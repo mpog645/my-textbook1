@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電力電子學：原理與設計 | 互動教科書</title>
+    <style>
+        :root {
+            --primary: #2563eb; /* 類似你圖片的藍色 */
+            --secondary: #f3f4f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--secondary);
+            color: var(--text-dark);
+        }
+
+        /* 左側導覽列 */
+        .sidebar {
+            width: 280px;
+            background-color: var(--white);
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 24px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-category {
+            padding: 16px 24px 8px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            font-weight: 700;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #eff6ff;
+            color: var(--primary);
+        }
+
+        .menu-item.active {
+            background-color: #eff6ff;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* 右側內容區 */
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            background-color: var(--white);
+            max-width: 1200px; /* 閱讀舒適寬度 */
+            margin: 0 auto;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.02);
+        }
+
+        /* 內容樣式 */
+        .hero-section {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+        }
+
+        h1 { margin: 0; font-size: 2.2rem; }
+        .subtitle { opacity: 0.9; margin-top: 10px; font-size: 1.1rem; }
+
+        .content-body h2 { color: var(--text-dark); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; margin-top: 40px; }
+        .content-body h3 { color: var(--primary); margin-top: 30px; }
+        .content-body p { line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 20px; }
+        
+        .formula-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2rem;
+            text-align: center;
+            color: #0f172a;
+        }
+
+        .note-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #f97316;
+            padding: 16px;
+            margin: 20px 0;
+            color: #9a3412;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-box {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+        
+        .example-title {
+            font-weight: 700;
+            color: #166534;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e5e7eb; }
+            .main-content { padding: 20px; }
+        }
+/* 圖片區塊樣式 */
+        .figure-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .figure-box img {
+            max-width: 100%; /* 確保圖片不超出寬度 */
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .figure-caption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">
+            ⚡ PE Learning
+        </div>
+        <ul class="menu" id="menu-container">
+            </ul>
+    </nav>
+
+    <main class="main-content">
+        <div id="content-display">
+            </div>
+    </main>
+
+    <script>
+        // === 這裡就是我們存放所有內容的資料庫 ===
+        // 之後我們會把新生成的章節加到這個陣列裡
+        const bookData = [
+            {
+                id: "intro",
+                category: "導讀",
+                title: "歡迎來到電力電子學",
+                content: `
+                    <div class="hero-section">
+                        <h1>電力電子學：原理與設計</h1>
+                        <div class="subtitle">從基礎元件物理到高階轉換器設計的完整指南</div>
+                    </div>
+                    <div class="content-body">
+                        <p>歡迎使用這份互動式講義。本課程旨在填補理論與實務之間的鴻溝，內容涵蓋數百頁教科書的精華。</p>
+                        <p>請從左側選單選擇章節開始學習。我們會從最基礎的開關元件講起，一路深入到複雜的閉迴路控制與磁性元件設計。</p>
+                    </div>
+                `
+            },
+            
+           
+            {
+                id: "ch1-1",
+                category: "第一章：功率元件物理",
+                title: "1.1 功率半導體元件：物理、損耗與新材料",
+                content: `
+                    <div class="content-body">
+<p>電力電子轉換器的效率取決於功率開關的性能。在實際應用中，開關並非理想導體，其內部的半導體物理特性會導致顯著的電壓降與能量損耗。本節將深入探討 MOSFET 與 IGBT 的導通機制，並介紹次世代的寬能隙材料。</p>
+
+<h3>1.1.1 功率 MOSFET 的導通機制</h3>
+<p>金屬氧化物半導體場效電晶體 (MOSFET) 是一種多數載子元件。當閘極電壓 \\( V_{gs} \\) 超過閾值 \\( V_{th} \\) 時，通道形成，元件進入歐姆區。</p>
+
+<h4>1. 導通電阻 \\( R_{DS(on)} \\) 的組成</h4>
+<p>導通電阻由多個物理結構串聯而成：</p>
+
+<div class="figure-box">
+    <img src="images/1.1_mosfet_structure.jpg" alt="功率 MOSFET 垂直結構與導通電阻分佈圖">
+    <div class="figure-caption">圖 1.1.1：功率 MOSFET 垂直結構與導通電阻分量示意圖</div>
+</div>
+
+<ul>
+    <li>\\( R_{channel} \\)：通道電阻（受 \\( V_{gs} \\) 控制）。</li>
+    <li>\\( R_{JFET} \\)：JFET 效應區域電阻。</li>
+    <li>\\( R_{drift} \\)：漂移區電阻。這是決定元件耐壓能力的關鍵，耐壓越高，此項越大。</li>
+</ul>
+
+<h4>2. 溫度對 \\( R_{DS(on)} \\) 的影響</h4>
+<p>矽晶格振動隨溫度升高而加劇，阻礙載子移動，導致遷移率 \\( \\mu \\) 下降，電阻上升。</p>
+
+<div class="figure-box">
+    <img src="images/1.1_rdson_temp.jpg" alt="標準化的導通電阻隨接面溫度變化曲線">
+    <div class="figure-caption">圖 1.1.2：導通電阻 \\( R_{DS(on)} \\) 隨接面溫度變化曲線 (正規化至 25°C)</div>
+</div>
+
+<div class="formula-box">
+    $$ R_{DS(on)}(T_j) = R_{DS(on)}(25^\\circ C) \\cdot \\left( \\frac{T_j}{25} \\right)^k $$
+</div>
+
+<h3>1.1.2 IGBT 與二極體模型</h3>
+<p>IGBT 與 Power Diode 屬於少數載子元件，具有電導調變效應。</p>
+
+<div class="figure-box">
+    <img src="images/1.1_igbt_vi_curve.jpg" alt="IGBT 或二極體的導通 V-I 特性曲線">
+    <div class="figure-caption">圖 1.1.3：IGBT/二極體 V-I 特性曲線與線性近似模型</div>
+</div>
+
+<div class="formula-box">
+    $$ v(t) = V_{T0} + r_d \\cdot i(t) $$
+</div>
+
+<h3>1.1.3 損耗計算推導</h3>
+<p>MOSFET 損耗與有效電流平方成正比：\\( P_{MOS} = I_{rms}^2 \\cdot R_{DS(on)} \\)。<br>
+IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} + r_d I_{rms}^2 \\)。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>1.1.4 進階議題：寬能隙半導體 (Wide Bandgap, WBG)</h3>
+<p>隨著電動車與高密度電源的需求增加，傳統矽 (Si) 元件已接近其物理極限。碳化矽 (SiC) 與氮化鎵 (GaN) 因具有更大的能隙 (Bandgap)，正在取代矽元件。</p>
+
+<h4>材料特性比較</h4>
+<ul>
+    <li><strong>臨界電場 (Critical Field)：</strong> WBG 材料是矽的 10 倍以上。這意味著在相同的耐壓下，漂移區可以做得更薄、摻雜濃度更高，從而大幅降低 \\( R_{DS(on)} \\)。</li>
+    <li><strong>電子飽和速度 (Electron Velocity)：</strong> 速度更快，允許更高的切換頻率 \\( f_{sw} \\)。</li>
+    <li><strong>導熱係數 (Thermal Conductivity)：</strong> SiC 的導熱性極佳（是 Si 的 3 倍），非常適合高溫操作。</li>
+</ul>
+
+<div class="figure-box">
+    <img src="images/1.1_wbg_comparison.jpg" alt="Si, SiC, GaN 材料特性比較雷達圖">
+    <div class="figure-caption">圖 1.1.4：矽 (Si)、碳化矽 (SiC) 與氮化鎵 (GaN) 的關鍵物理特性比較 (雷達圖)</div>
+</div>
+
+<div class="note-box">
+    <strong>設計思維：</strong> GaN 適合低電壓 (<650V)、超高頻應用 (如手機充電器)；SiC 適合高電壓 (>900V)、大功率應用 (如電動車逆變器)。
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 觀念題</h4>
+    <p><strong>Q1：</strong> 為什麼 MOSFET 的導通損耗計算要使用 \\( I_{rms} \\)，而二極體的導通損耗公式中卻包含 \\( I_{avg} \\)？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">MOSFET 在導通時呈現電阻性 (\\(V=IR\\))，功率 \\(P=I^2R\\)，故與 RMS 平方成正比。二極體/IGBT 有內建電位 \\(V_{T0}\\)，產生 \\(P = V_{T0} \\cdot I\\) 的項，積分後與平均電流 \\(I_{avg}\\) 相關。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 基礎計算</h4>
+    <p><strong>Q2：</strong> 某 MOSFET 規格書標示 \\( R_{DS(on)} = 50m\\Omega \\) @ 25°C。若溫度係數 \\( k=2.2 \\)，請估算在接面溫度 125°C 時的導通電阻值。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        $$ R_{125} = 50m\\Omega \\cdot \\left(\\frac{125}{25}\\right)^{2.2} = 50 \\cdot (5)^{2.2} \\approx 50 \\cdot 34.5 = 1725 m\\Omega $$
+        <br>注意：電阻暴增了約 34 倍！這是一個極端例子，實際元件通常增加 1.6~2.5 倍。若 \\(T\\) 用絕對溫度 (K) 計算會更精準，但工程上常用攝氏做快速估算，這裡展示的是指數效應的威力。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 波形分析</h4>
+    <p><strong>Q3：</strong> 一個 Buck 轉換器操作在 D=0.4，輸出電流為 10A (假設無漣波)。若改用 IGBT ( \\(V_{T0}=1V, r_d=0.05\\Omega\\) )，求其傳導損耗。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. \\( I_{avg} = D \\cdot I_o = 0.4 \\cdot 10 = 4A \\)<br>
+        2. \\( I_{rms}^2 = D \\cdot I_o^2 = 0.4 \\cdot 100 = 40 A^2 \\)<br>
+        3. \\( P = 1 \\cdot 4 + 0.05 \\cdot 40 = 4 + 2 = 6W \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 設計選型</h4>
+    <p><strong>Q4：</strong> 在 1000V 的高壓應用中，為什麼工程師傾向使用 SiC MOSFET 而非傳統 Si MOSFET？請列舉兩個物理原因。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. <strong>漂移區電阻更低：</strong> SiC 臨界電場高，漂移區可以做得更薄且摻雜濃度更高，大幅降低高壓元件的 \\(R_{DS(on)}\\)。<br>
+        2. <strong>導熱更好：</strong> SiC 導熱係數高，容易將高壓產生的大量熱能導出。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 進階挑戰</h4>
+    <p><strong>Q5：</strong> (思考題) 若忽略溫度影響，並聯兩個相同的 MOSFET，總傳導損耗會變成原本的幾倍？並聯兩個 IGBT 呢？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>MOSFET：</strong> 電流減半，\\( P_{new} = 2 \\times [ (I/2)^2 \\cdot R ] = 2 \\cdot I^2R/4 = 0.5 P_{old} \\)。並聯可減半損耗。<br>
+        <strong>IGBT：</strong> \\( V_{T0} \\) 造成的壓降不隨電流減半而改變。 \\( P_{new} \\approx 2 \\times [V_{T0}(I/2)] = V_{T0}I \\)。損耗幾乎不變（僅 \\(r_d\\) 部分減少）。這也是為什麼 MOSFET 適合並聯，IGBT 效益較低。</p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+            
+            
+            {
+                id: "ch1-2",
+                category: "第一章：功率元件物理",
+                title: "1.2 切換損耗分析與閘極驅動設計",
+                content: `
+                    <div class="content-body">
+<p>切換損耗 (Switching Loss) 是高頻轉換器的主要熱源。不同於傳導損耗發生在靜態導通時，切換損耗發生在極短的「開啟」與「關閉」過渡瞬間。本節將剖析 V-I 重疊現象、米勒效應的物理本質，以及實務上的驅動電路設計。</p>
+
+<h3>1.2.1 硬切換 (Hard Switching) 機制</h3>
+<p>在電感性負載下，開關無法瞬間完成狀態改變。電壓與電流波形會在過渡期間發生重疊，產生巨大的瞬時功率突波。</p>
+
+<div class="figure-box">
+    <img src="images/1.2_switching_waveforms.jpg" alt="硬切換過程中的電壓電流重疊波形">
+    <div class="figure-caption">圖 1.2.1：硬切換下電壓(V)與電流(I)的重疊區域產生了切換損耗(P)</div>
+</div>
+
+<div class="formula-box">
+    $$ P_{sw} \\approx \\frac{1}{2} V_{in} I_o (t_{on} + t_{off}) f_{sw} $$
+</div>
+
+<h3>1.2.2 米勒平台 (Miller Plateau) 物理分析</h3>
+<p>MOSFET 的開關速度受限於內部寄生電容的充放電，特別是汲極-閘極電容 \\( C_{gd} \\)（米勒電容）。</p>
+
+<div class="figure-box">
+    <img src="images/1.2_miller_plateau.jpg" alt="MOSFET 閘極充電特性曲線與米勒平台區域">
+    <div class="figure-caption">圖 1.2.2：閘極電壓 \\( V_{gs} \\) 隨電荷 \\( Q_g \\) 變化的曲線，平坦區即為米勒平台</div>
+</div>
+
+<h4>為什麼電壓會卡住？</h4>
+<p>當 \\( V_{ds} \\) 開始下降時，根據電容公式 \\( I = C \\frac{dV}{dt} \\)，驅動電流 \\( I_g \\) 必須負責抽取 \\( C_{gd} \\) 的電荷以支持電壓變化。此時：</p>
+<div class="formula-box">
+    $$ I_{gate} \\approx C_{gd} \\cdot \\frac{dV_{ds}}{dt} $$
+</div>
+<p>由於所有的驅動電流都拿去對抗 \\( C_{gd} \\) 的電位變化（負回授效應），沒有多餘電流能讓 \\( C_{gs} \\) 電壓上升，導致 \\( V_{gs} \\) 呈現水平狀態，直到 \\( V_{ds} \\) 降至接近 0V。</p>
+
+<h3>1.2.3 寄生電容輸出損耗 (\\( E_{oss} \\))</h3>
+<p>MOSFET 的輸出電容 \\( C_{oss} \\) 在截止時儲存能量 \\( \\frac{1}{2} C_{oss} V^2 \\)。導通瞬間，此能量透過通道內阻 \\( R_{DS(on)} \\) 轉化為熱。</p>
+
+<div class="figure-box">
+    <img src="images/1.2_coss_loss.jpg" alt="輸出電容 Eoss 儲能與內部放電路徑示意圖">
+    <div class="figure-caption">圖 1.2.3：\\( C_{oss} \\) 內部短路放電路徑示意圖</div>
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>1.2.4 實務設計：閘極驅動電路 (Gate Driver Design)</h3>
+<p>工程師透過調整串聯在閘極的電阻 \\( R_g \\) 來控制開關速度。</p>
+
+<h4>\\( R_g \\) 的權衡折衷 (Trade-off)</h4>
+<ul>
+    <li><strong>\\( R_g \\) 太小 (切換極快)：</strong> \\( t_{on} \\) 縮短，損耗降低。但 \\( di/dt \\) 與 \\( dv/dt \\) 過大，會引發嚴重的振鈴 (Ringing) 與電磁干擾 (EMI)，甚至擊穿閘極氧化層。</li>
+    <li><strong>\\( R_g \\) 太大 (切換慢)：</strong> EMI 表現好，波形平滑。但 V-I 重疊時間拉長，切換損耗暴增，MOSFET 可能過熱燒毀。</li>
+</ul>
+
+<div class="figure-box">
+    <img src="images/1.2_rg_effect.jpg" alt="不同閘極電阻 Rg 對切換波形震盪與速度的影響比較">
+    <div class="figure-caption">圖 1.2.4：不同 \\( R_g \\) 值對開關波形 \\( V_{ds} \\) 的影響 (震盪 vs 損耗)</div>
+</div>
+
+<div class="note-box">
+    <strong>設計經驗法則：</strong> 通常會在二極體上並聯一個電阻，實現「慢開快關」 (Slow Turn-on, Fast Turn-off)，以降低開啟時的二極體反向恢復電流，同時減少關閉損耗。
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 觀念題</h4>
+    <p><strong>Q1：</strong> 在米勒平台區域 (Miller Plateau) 期間，MOSFET 的 \\( V_{ds} \\) 電壓主要發生什麼變化？ \\( I_d \\) 電流呢？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">在米勒平台區，\\( I_d \\) 已經上升到負載電流並保持恆定，而 \\( V_{ds} \\) 正從輸入電壓 \\( V_{in} \\) 快速下降至 0V。這是電壓變化率 \\( dv/dt \\) 最大的區間。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 基礎計算</h4>
+    <p><strong>Q2：</strong> 某轉換器 \\( V_{in}=400V, I_o=10A, f_{sw}=50kHz \\)。若測得交越時間 \\( t_{on}=t_{off}=50ns \\)，求總切換損耗。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        $$ P_{sw} = 0.5 \\cdot 400 \\cdot 10 \\cdot (50n + 50n) \\cdot 50k $$
+        $$ P_{sw} = 2000 \\cdot 100e-9 \\cdot 50000 = 10 W $$
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 驅動電流估算</h4>
+    <p><strong>Q3：</strong> 欲驅動一顆總閘極電荷 \\( Q_g = 100nC \\) 的 MOSFET，若希望開關時間在 \\( 20ns \\) 內完成，驅動 IC 至少需要提供多少電流？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        利用平均電流公式 \\( I = \\Delta Q / \\Delta t \\)：<br>
+        $$ I_{drive} = \\frac{100 nC}{20 ns} = 5 A $$<br>
+        這顯示了為什麼大功率 MOSFET 需要專用的 Gate Driver IC，微控制器 (MCU) 的 GPIO (20mA) 是推不動的。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 驅動損耗</h4>
+    <p><strong>Q4：</strong> 承上題，若驅動電壓 \\( V_{gs} = 12V \\)，開關頻率 100kHz，請問驅動電路本身消耗多少功率？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        驅動損耗來自對閘極電容充放電：<br>
+        $$ P_{drive} = Q_g \\cdot V_{gs} \\cdot f_{sw} $$
+        $$ P_{drive} = 100nC \\cdot 12V \\cdot 100kHz = 0.12 W $$
+        注意：這部分損耗主要消耗在驅動 IC 和閘極電阻 \\( R_g \\) 上，而非 MOSFET 內部。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 進階思考</h4>
+    <p><strong>Q5：</strong> 軟切換 (Soft Switching, ZVS/ZCS) 技術如何消除切換損耗？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        硬切換損耗來自 V 與 I 的重疊。軟切換利用諧振電路 (Resonant Tank)，在開關切換前，強制讓電壓先降到零 (Zero Voltage Switching, ZVS) 或電流先降到零 (Zero Current Switching, ZCS)。當 V 或 I 其中一項為零時，重疊面積 (功率) 即為零，理論上可消除切換損耗。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+            
+            
+            {
+                id: "ch1-3",
+                category: "第一章：功率元件物理",
+                title: "1.3 熱阻模型、暫態阻抗與散熱設計",
+                content: `
+                    <div class="content-body">
+<p>所有損耗最終都會轉換為熱能。若無法有效散熱，接面溫度 (Junction Temperature, \\( T_j \\)) 將超過矽的極限（通常為 150°C 或 175°C），導致元件永久性損壞。本節將建立完整的「熱-電」類比模型，並探討動態熱行為。</p>
+
+<h3>1.3.1 電路-熱路類比 (Electrical-Thermal Analogy)</h3>
+<p>熱的傳遞遵循與電路極為相似的物理法則。我們可以將複雜的熱傳導問題簡化為等效電路圖來求解：</p>
+
+<div class="figure-box">
+    <img src="images/1.3_thermal_equivalent_circuit.jpg" alt="功率元件到環境的熱阻串聯等效電路圖">
+    <div class="figure-caption">圖 1.3.1：從接面 (Junction) 到環境 (Ambient) 的熱阻串聯等效電路模型</div>
+</div>
+
+<table style="width:100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95rem;">
+    <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+        <th style="padding: 10px; text-align: left;">物理量</th>
+        <th style="padding: 10px; text-align: left;">電路類比</th>
+        <th style="padding: 10px; text-align: left;">熱路類比</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td style="padding: 10px;">位勢差</td>
+        <td style="padding: 10px;">電壓 \\( V \\) (Volts)</td>
+        <td style="padding: 10px;">溫差 \\( \\Delta T \\) (°C)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td style="padding: 10px;">流量</td>
+        <td style="padding: 10px;">電流 \\( I \\) (Amps)</td>
+        <td style="padding: 10px;">熱功率 \\( P \\) (Watts)</td>
+    </tr>
+    <tr>
+        <td style="padding: 10px;">儲存元件</td>
+        <td style="padding: 10px;">電容 \\( C \\) (Farads)</td>
+        <td style="padding: 10px;">熱容 \\( C_{\\theta} \\) (J/°C)</td>
+    </tr>
+</table>
+
+<h3>1.3.2 暫態熱阻抗 (Transient Thermal Impedance, \\( Z_{th} \\))</h3>
+<p>在脈衝功率下，由於元件材料（矽晶片、銅底板）具有<strong>熱容量</strong>，溫度不會瞬間上升。這就像電容需要時間充電一樣。</p>
+
+<div class="figure-box">
+    <img src="images/1.3_zth_curve.jpg" alt="Datasheet 中的暫態熱阻抗 Zth 曲線">
+    <div class="figure-caption">圖 1.3.2：典型功率 MOSFET 的標準化暫態熱阻抗曲線 (Normalized Thermal Response)</div>
+</div>
+
+<div class="formula-box">
+    $$ \\Delta T_j(t) = P_{pulse} \\cdot Z_{th JC}(t) $$
+</div>
+
+<h3>1.3.3 進階理論：Foster 與 Cauer 熱網路模型</h3>
+<p>為了在模擬軟體 (如 SPICE) 中精確預測溫度，我們需要建立 RC 網路模型。</p>
+
+<div class="figure-box">
+    <img src="images/1.3_rc_network.jpg" alt="Foster 與 Cauer 兩種熱阻電容網路模型的電路結構比較">
+    <div class="figure-caption">圖 1.3.3：Foster 模型 (左) 與 Cauer 模型 (右) 的電路結構差異</div>
+</div>
+
+<ul>
+    <li><strong>Foster 模型 (數學擬合)：</strong> RC 並聯後再串聯。節點沒有物理意義，但參數容易從 Datasheet 的 \\( Z_{th} \\) 曲線透過數學擬合取得。適合大部分一般應用。</li>
+    <li><strong>Cauer 模型 (物理結構)：</strong> T 型網路。每個節點代表實際的物理層（如：晶片、銲錫、銅底板）。參數難以取得，需原廠提供，但能真實反映各層溫度。</li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>1.3.4 實務設計：散熱片選用</h3>
+<p>散熱片 (Heatsink) 的熱阻 \\( R_{\\theta SA} \\) 並非定值，它高度依賴於空氣流速。</p>
+<ul>
+    <li><strong>自然對流 (Natural Convection)：</strong> 效率最低，熱阻取決於溫差與鰭片方向。</li>
+    <li><strong>強制對流 (Forced Convection)：</strong> 使用風扇。風速 (LFM) 越高，邊界層越薄，熱阻越低。</li>
+</ul>
+<div class="note-box">
+    <strong>工程經驗：</strong> 在有風扇的系統中，散熱片熱阻通常可降至自然對流時的 1/3 到 1/5。
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 觀念題</h4>
+    <p><strong>Q1：</strong> 為什麼在極短的脈衝功率下（例如 10us 的短路電流），我們可以暫時忽略散熱片的效果？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">因為熱傳遞需要時間。在極短時間內，熱量僅被晶片本身的熱容 (\\(C_{silicon}\\)) 吸收，還來不及傳導到外殼和散熱片。此時系統表現為絕熱狀態 (Adiabatic)。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 基礎計算</h4>
+    <p><strong>Q2：</strong> 某元件 \\( R_{\\theta JC}=1.0^\\circ C/W \\)，安裝在 \\( R_{\\theta SA}=5.0^\\circ C/W \\) 的散熱片上（忽略 \\( R_{\\theta CS} \\)）。若環境溫度 30°C，損耗 20W，求接面溫度 \\( T_j \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        $$ T_j = P \\cdot (R_{\\theta JC} + R_{\\theta SA}) + T_a $$
+        $$ T_j = 20 \\cdot (1.0 + 5.0) + 30 = 120 + 30 = 150^\\circ C $$
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 暫態分析</h4>
+    <p><strong>Q3：</strong> 查閱 Datasheet，某 MOSFET 在 10ms 脈衝下的暫態熱阻係數 \\( r(t) = 0.1 \\) (正規化值)。若穩態熱阻 \\( R_{\\theta JC} = 2^\\circ C/W \\)，求 10ms 內注入 500W 脈衝時的溫升。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        暫態熱阻 \\( Z_{th}(10ms) = r(t) \\cdot R_{\\theta JC} = 0.1 \\cdot 2 = 0.2^\\circ C/W \\)<br>
+        溫升 \\( \\Delta T = P \\cdot Z_{th} = 500 \\cdot 0.2 = 100^\\circ C \\)<br>
+        (若此時外殼溫度 25°C，則 \\( T_j = 125^\\circ C \\)，在安全範圍內)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 設計選型</h4>
+    <p><strong>Q4：</strong> 你正在為一款 LED 驅動器選擇散熱片。計算出需要 \\( 4^\\circ C/W \\) 的熱阻。廠商型錄顯示某款散熱片在自然對流下為 \\( 8^\\circ C/W \\)，在 200 LFM 風速下為 \\( 3.5^\\circ C/W \\)。請問若不加風扇，這款散熱片可以用嗎？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        不行。自然對流下的 \\( 8^\\circ C/W \\) 高於需求的 \\( 4^\\circ C/W \\)，會導致過熱。必須加裝風扇提供至少 200 LFM 的風流，或更換體積更大的散熱片。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 模型挑戰</h4>
+    <p><strong>Q5：</strong> (思考題) 為什麼在 SPICE 模擬中，如果想要觀察元件內部「每一層」的溫度分佈，必須使用 Cauer 模型而不是 Foster 模型？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        因為 Cauer 模型的 RC 節點對應實際物理層（Chip, Solder, Case...），可以直接量測各節點電壓代表該層溫度。Foster 模型只是數學函數擬合，其中間節點電壓沒有物理意義，無法代表內部特定位置的溫度。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            
+            {
+                id: "ch2-1",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.1 核心分析工具：SMPS 的數學物理基礎",
+                content: `
+                    <div class="content-body">
+<p>在分析切換式電源 (SMPS) 時，傳統的電路分析法 (KVL/KCL) 難以直接應用，因為電路結構隨開關狀態不斷改變。我們必須依賴三套強大的分析工具：伏秒/安秒平衡、小漣波近似，以及開關模型。</p>
+
+<h3>2.1.1 伏秒平衡與安秒平衡 (Balance Principles)</h3>
+<p>這是推導任何轉換器電壓增益 (Voltage Gain) 的起手式。</p>
+
+<h4>電感伏秒平衡 (Volt-Second Balance)</h4>
+<p>在穩態操作下，電感電流週期性復歸（起點等於終點），因此電感兩端電壓在一個週期內的積分必須為零：</p>
+<div class="formula-box">
+    $$ \\int_{0}^{T_{sw}} v_L(t) \\, dt = 0 \\quad \\Rightarrow \\quad \\langle v_L \\rangle = 0 $$
+</div>
+
+<div class="figure-box">
+    <img src="images/2.1_volt_sec_balance.jpg" alt="電感電壓波形圖，顯示正面積(A)必須等於負面積(B)">
+    <div class="figure-caption">圖 2.1.1：穩態下的電感伏秒平衡示意圖 (Area A = Area B)</div>
+</div>
+
+<h4>電容安秒平衡 (Ampere-Second Balance)</h4>
+<p>同理，穩態下電容電壓不發散，故流經電容的電流平均值必須為零（用來計算漣波電壓）：</p>
+<div class="formula-box">
+    $$ \\int_{0}^{T_{sw}} i_C(t) \\, dt = 0 \\quad \\Rightarrow \\quad \\langle i_C \\rangle = 0 $$
+</div>
+
+<h3>2.1.2 小漣波近似 (Small Ripple Approximation)</h3>
+<p>在推導直流轉換比 \\( M(D) = V_o/V_{in} \\) 時，為了簡化微分方程，我們假設輸出電容夠大，使得輸出電壓漣波遠小於直流分量。</p>
+<div class="formula-box">
+    $$ v_o(t) = V_o + v_{ripple}(t) \\approx V_o $$
+</div>
+<div class="note-box">
+    <strong>觀念釐清：</strong> 這並不代表漣波為零！我們在計算電感電流斜率 \\( di/dt = (V_{in}-v_o)/L \\) 時，會用 \\( V_o \\) 來代替 \\( v_o(t) \\) 以求得線性解。但在計算輸出漣波 \\( \\Delta v \\) 時，則必須把漣波項考慮進來。
+</div>
+
+<h3>2.1.3 PWM 開關等效模型 (Switch Model)</h3>
+<p>為了脫離具體的元件（MOSFET/Diode）特性，專注於拓撲結構，我們將主動開關與被動開關組合成一個 **單刀雙擲 (SPDT)** 模型。</p>
+
+<div class="figure-box">
+    <img src="images/2.1_pwm_switch_model.jpg" alt="將電晶體與二極體簡化為 SPDT 開關的等效電路模型">
+    <div class="figure-caption">圖 2.1.2：PWM 開關等效模型：(a) 實際電路 (b) 簡化後的三端子 SPDT 開關</div>
+</div>
+
+<ul>
+    <li><strong>端子 a (Active)：</strong> 接在 MOSFET 端。</li>
+    <li><strong>端子 p (Passive)：</strong> 接在 Diode 端。</li>
+    <li><strong>端子 c (Common)：</strong> 接在電感端。</li>
+</ul>
+<p>透過這個模型，Buck、Boost、Buck-Boost 其實只是這個 SPDT 開關與電感、電容的不同連接方式罷了！</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 觀念題</h4>
+    <p><strong>Q1：</strong> 如果一個轉換器的電感伏秒不平衡（例如正面積 > 負面積），電路會發生什麼事？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">電感電流會在每個週期結束時比開始時略大一點，隨著週期累積，電流會呈現階梯式上升，直到磁芯飽和 (Saturation) 或元件燒毀。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 基礎計算</h4>
+    <p><strong>Q2：</strong> 某電路電感電壓波形如下：導通時間 \\( t_{on}=4\\mu s \\)，電壓 \\( 10V \\)；截止時間 \\( t_{off}=6\\mu s \\)，電壓為 \\( -V_x \\)。求穩態下的 \\( V_x \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        根據伏秒平衡：正面積 = 負面積（絕對值）<br>
+        \\( 10V \\times 4\\mu s = V_x \\times 6\\mu s \\)<br>
+        \\( V_x = 40/6 \\approx 6.67 V \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 模型應用</h4>
+    <p><strong>Q3：</strong> 在 PWM 開關模型中，如果 SPDT 的 Common 端接在輸入 \\( V_{in} \\)，Active 端接電感，Passive 端接地，這是哪種轉換器？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">這是陷阱題！Common 端通常接電感。如果配置改變，通常無法正常運作。但標準的 Buck 是：Active 接 \\( V_{in} \\)，Passive 接地，Common 接電感。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 近似分析</h4>
+    <p><strong>Q4：</strong> 為什麼在使用小漣波近似計算直流增益時，我們可以忽略電容 ESR (等效串聯電阻) 的影響？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">因為 ESR 造成的壓降通常屬於交流漣波成分，且遠小於直流輸出電壓。在計算直流穩態工作點 (DC Operating Point) 時，電感視為短路，電容視為開路，ESR 的效應在直流分析中消失。</p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 進階思考</h4>
+    <p><strong>Q5：</strong> 安秒平衡可以用來計算電容電壓漣波。若流進電容的電流是一個方波（例如 Boost 的輸出電容），與流進三角波（例如 Buck 的輸出電容），哪一種造成的電壓漣波比較大？（假設頻率電容值相同）</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        方波電流造成的漣波較大。因為方波的劇烈階梯變化會在 ESR 上產生瞬間壓降跳變 (\\( \\Delta V = I \\cdot ESR \\))，加上電容充放電的斜率較陡；而三角波電流變化緩和，主要由電容積分效應主導。</p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            
+            
+            {
+                id: "ch2-2",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.2 降壓轉換器 (Buck Converter)：CCM 穩態分析與設計詳解",
+                content: `
+                    <div class="content-body">
+<p>降壓轉換器 (Buck Converter) 是現代電子學中最廣泛應用的拓撲。本節將進行教科書等級的嚴謹分析，從微分方程建模到同步整流技術，徹底解構其運作原理。</p>
+
+<h3>2.2.1 電路拓撲與狀態空間分析 (State-Space Analysis)</h3>
+<p>為了深入了解電路行為，我們必須列出開關在不同狀態下的微分方程。定義狀態變數為電感電流 \\( i_L(t) \\) 與電容電壓 \\( v_C(t) \\)。</p>
+
+<div class="figure-box">
+    <img src="images/2.2_buck_states.jpg" alt="Buck Converter 在開關導通(ON)與截止(OFF)時的電流路徑示意圖">
+    <div class="figure-caption">圖 2.2.1：(a) 狀態 I：開關導通，電感儲能；(b) 狀態 II：開關截止，電感釋能 (續流)</div>
+</div>
+
+<h4>狀態 I：開關導通 (Switch ON, \\( 0 \\le t < DT_s \\))</h4>
+<p>輸入電源 \\( V_{in} \\) 跨接於電路，二極體截止。根據 KVL 與 KCL：</p>
+<div class="formula-box">
+    $$ L \\frac{di_L}{dt} = V_{in} - v_o $$
+    $$ C \\frac{dv_o}{dt} = i_L - \\frac{v_o}{R} $$
+</div>
+
+<h4>狀態 II：開關截止 (Switch OFF, \\( DT_s \\le t < T_s \\))</h4>
+<p>開關斷開，電感感應電勢迫使二極體導通 (或下臂 MOSFET 導通)。輸入電源被切斷：</p>
+<div class="formula-box">
+    $$ L \\frac{di_L}{dt} = 0 - v_o = -v_o $$
+    $$ C \\frac{dv_o}{dt} = i_L - \\frac{v_o}{R} $$
+</div>
+
+<h3>2.2.2 轉換函數與電感漣波推導</h3>
+<p>利用伏秒平衡原理 \\( \\langle v_L \\rangle = 0 \\)，我們對電感電壓在一個週期內積分：</p>
+<div class="formula-box">
+    $$ \\int_{0}^{T_s} v_L(t) dt = (V_{in} - V_o)DT_s + (-V_o)(1-D)T_s = 0 $$
+</div>
+<p>化簡後可得直流電壓增益 \\( M(D) \\)：</p>
+<div class="formula-box">
+    $$ V_o = D \\cdot V_{in} $$
+</div>
+
+<h4>電感電流漣波 (Inductor Current Ripple, \\( \\Delta i_L \\))</h4>
+<p>電流變化率 \\( di_L/dt \\) 在導通期間為常數。利用 \\( \\Delta i = \\text{Slope} \\times \\Delta t \\)：</p>
+<div class="formula-box">
+    $$ \\Delta i_L = \\frac{V_{in} - V_o}{L} \\cdot DT_s = \\frac{V_o (1-D)}{L f_{sw}} $$
+</div>
+<div class="note-box">
+    <strong>設計直覺：</strong> 為了降低漣波，我們可以 (1) 增加電感 L，(2) 提高頻率 \\( f_{sw} \\)。但 L 增加會導致體積變大，\\( f_{sw} \\) 增加會導致切換損耗上升。工程上通常設計 \\( \\Delta i_L \\) 為最大負載電流的 20% ~ 40%。
+</div>
+
+<h3>2.2.3 輸出電壓漣波：考慮 ESR 效應</h3>
+<p>真實的輸出電容並非理想元件，它包含等效串聯電阻 (ESR, \\( R_c \\))。輸出電壓漣波 \\( \\Delta v_o \\) 其實是由兩部分組成的：</p>
+
+<div class="figure-box">
+    <img src="images/2.2_ripple_components.jpg" alt="輸出電壓漣波的組成：電容充放電成分與 ESR 壓降成分">
+    <div class="figure-caption">圖 2.2.2：電壓漣波由 (a) 電容積分項 (二次曲線) 與 (b) ESR 電阻項 (方波/三角波) 疊加而成</div>
+</div>
+
+<ol>
+    <li><strong>電容充放電成分 (\\( \\Delta v_C \\))：</strong> 由電荷積分產生，呈現二次拋物線或三角波形。
+    $$ \\Delta v_C = \\frac{\\Delta Q}{C} = \\frac{1}{C} \\cdot \\frac{1}{2} \\frac{T_s}{2} \\frac{\\Delta i_L}{2} = \\frac{\\Delta i_L}{8 C f_{sw}} $$
+    </li>
+    <li><strong>ESR 電阻壓降成分 (\\( \\Delta v_{ESR} \\))：</strong> 電流漣波流過 ESR 產生的壓降。
+    $$ \\Delta v_{ESR} = \\Delta i_L \\cdot ESR $$
+    </li>
+</ol>
+<p>總漣波約為兩者之和（最壞情況）：</p>
+<div class="formula-box">
+    $$ \\Delta v_{o, total} \\approx \\Delta i_L \\left( ESR + \\frac{1}{8 C f_{sw}} \\right) $$
+</div>
+<p>在現代使用積層陶瓷電容 (MLCC) 的設計中，ESR 極低，電容項主導；但在使用鋁電解電容的舊式設計中，ESR 項通常主導了漣波大小。</p>
+
+<h3>2.2.4 進階技術：同步整流 (Synchronous Rectification)</h3>
+<p>傳統 Buck 使用二極體續流。二極體有 \\( 0.5V \\sim 1.0V \\) 的導通壓降 \\( V_F \\)。當輸出電壓很低 (如 GPU 的 1.2V) 時，二極體損耗佔比極高：</p>
+<p>$$ \\eta \\approx \\frac{V_o}{V_o + V_F} $$</p>
+<p>若 \\( V_o=1.2V, V_F=0.8V \\)，效率上限僅 60%！</p>
+
+<p><strong>同步整流</strong>使用低導通電阻 (\\( R_{DS(on)} \\)) 的 MOSFET 取代二極體（稱為下臂開關 SR-FET）。由於 \\( I \\cdot R_{DS(on)} \\) 遠小於 \\( V_F \\)，效率可大幅提升。</p>
+
+<div class="figure-box">
+    <img src="images/2.2_sync_buck.jpg" alt="同步整流 Buck 轉換器電路圖與死區時間波形">
+    <div class="figure-caption">圖 2.2.3：同步整流架構：Q1 為主開關，Q2 為同步整流開關。需注意死區時間 (Dead-time) 以避免穿透短路 (Shoot-through)。</div>
+</div>
+
+<div class="note-box">
+    <strong>死區時間 (Dead-time) 的必要性：</strong> 上下兩個 MOSFET 絕對不能同時導通，否則電源 \\( V_{in} \\) 直接對地短路。因此在切換瞬間，必須插入一段兩者皆關閉的時間，這段時間電流會短暫流過 SR-FET 的體二極體 (Body Diode)。
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 參數計算</h4>
+    <p><strong>Q1：</strong> 設計一個 Buck 轉換器，輸入 24V，輸出 5V，負載 2A，頻率 200kHz。若希望電感電流漣波率 (Ripple Ratio) 為 30%，求電感值 \\( L \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. \\( D = V_o / V_{in} = 5/24 \\approx 0.208 \\)<br>
+        2. 目標漣波 \\( \\Delta i_L = 2A \\times 0.3 = 0.6A \\)<br>
+        3. 代入公式：\\( L = \\frac{5 \\cdot (1-0.208)}{0.6 \\cdot 200000} = \\frac{3.96}{120000} \\approx 33 \\mu H \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 漣波分析</h4>
+    <p><strong>Q2：</strong> 承上題，若使用鋁電解電容，ESR 為 \\( 50m\\Omega \\)，電容值 \\( 100\\mu F \\)。請估算輸出電壓漣波，並判斷是由 ESR 還是電容值主導？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. ESR 成分：\\( \\Delta v_{ESR} = 0.6A \\times 0.05\\Omega = 30mV \\)<br>
+        2. 電容成分：\\( \\Delta v_C = \\frac{0.6}{8 \\cdot 100e-6 \\cdot 200e3} = \\frac{0.6}{160} \\approx 3.75mV \\)<br>
+        <strong>結論：</strong> 總漣波約 33.75mV，主要由 <strong>ESR</strong> 主導。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 臨界電感 (BCM)</h4>
+    <p><strong>Q3：</strong> 什麼是臨界電感 \\( L_{crit} \\)？若負載電阻 \\( R \\) 變大（負載變輕），電路更容易進入 CCM 還是 DCM？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        臨界電感是維持電流剛好連續 (不降至零) 的最小電感值。當負載變輕 (R 變大，\\( I_o \\) 變小) 時，平均電流下降，但漣波 \\( \\Delta i_L \\) 不變（因為 V, L, f, D 沒變），因此電流谷底更容易觸底歸零，故更容易進入 <strong>DCM</strong>。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 同步整流效率</h4>
+    <p><strong>Q4：</strong> 輸出 3.3V/10A 的轉換器。方案 A 使用二極體 (\\( V_F=0.5V \\))；方案 B 使用同步整流 (\\( R_{DS(on)}=10m\\Omega \\))。忽略切換損耗，計算兩者的傳導損耗差異。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        假設佔空比 D 小，續流時間長，近似全時流過。<br>
+        方案 A (Diode)：\\( P \\approx I \\cdot V_F = 10A \\cdot 0.5V = 5W \\)<br>
+        方案 B (Sync FET)：\\( P \\approx I^2 \\cdot R_{DS(on)} = 100 \\cdot 0.01 = 1W \\)<br>
+        <strong>差異：</strong> 同步整流節省了 4W 的損耗！效率大增。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 進階設計</h4>
+    <p><strong>Q5：</strong> 為什麼在高壓降壓應用 (例如 48V 轉 1V, D=0.02) 中，雖然同步整流效率好，但我們有時會刻意讓它進入 DCM 模式？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        在極低佔空比下，下臂開關導通時間極長，若強制 CCM，會有反向恢復電流損耗。允許進入 DCM (或使用 Diode Emulation Mode) 可以避免電感電流倒流 (Negative Current)，提升輕載效率，並解決極窄導通時間的控制問題。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch2-3",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.3 升壓轉換器 (Boost Converter)：升壓原理與實務限制",
+                content: `
+                    <div class="content-body">
+<p>升壓轉換器 (Boost Converter) 能產生高於輸入電壓的輸出。不同於 Buck 的電感在輸出端，Boost 的電感位於輸入端，這造就了其獨特的「連續輸入電流」特性，但也帶來了「不連續輸出電流」的挑戰。</p>
+
+<h3>2.3.1 電路拓撲與狀態分析</h3>
+<p>Boost 利用電感「反抗電流變化」的特性，將電感變成一個與電源串聯的電壓源。</p>
+
+<div class="figure-box">
+    <img src="images/2.3_boost_states.jpg" alt="Boost Converter 在導通(ON)與截止(OFF)時的電流路徑">
+    <div class="figure-caption">圖 2.3.1：(a) 狀態 I：開關 ON，電感儲能；(b) 狀態 II：開關 OFF，電感疊加電源向輸出釋能</div>
+</div>
+
+<h4>狀態 I：開關導通 (Switch ON, \\( 0 \\le t < DT_s \\))</h4>
+<p>開關短路到地。二極體因 \\( V_o > 0 \\) 而逆偏截止。</p>
+<ul>
+    <li><strong>電感迴路：</strong> 電源 \\( V_{in} \\) 直接跨接電感，電流線性上升。 \\( L \\frac{di_L}{dt} = V_{in} \\)</li>
+    <li><strong>輸出迴路：</strong> 負載能量全靠電容 \\( C \\) 提供（電容單獨放電）。 \\( C \\frac{dv_o}{dt} = - \\frac{v_o}{R} \\)</li>
+</ul>
+
+<h4>狀態 II：開關截止 (Switch OFF, \\( DT_s \\le t < T_s \\))</h4>
+<p>電感極性反轉以維持電流，二極體導通。</p>
+<ul>
+    <li><strong>電感迴路：</strong> 電感與電源串聯，共同對輸出充電。 \\( L \\frac{di_L}{dt} = V_{in} - V_o \\)</li>
+    <li><strong>輸出迴路：</strong> 電感電流流入電容與負載。 \\( C \\frac{dv_o}{dt} = i_L - \\frac{v_o}{R} \\)</li>
+</ul>
+
+<h3>2.3.2 轉換函數與物理極限</h3>
+<p>利用伏秒平衡原理 \\( \\langle v_L \\rangle = 0 \\)：</p>
+<div class="formula-box">
+    $$ V_{in} D + (V_{in} - V_o)(1-D) = 0 $$
+    $$ V_o = \\frac{V_{in}}{1-D} $$
+</div>
+
+<h4>為什麼 Boost 不能無限升壓？(寄生電阻效應)</h4>
+<p>理論公式顯示當 \\( D \\to 1 \\) 時， \\( V_o \\to \\infty \\)。但在現實中，電感有直流阻抗 \\( R_L \\)。當佔空比極高時，輸入電流 \\( I_{in} \\approx I_o / (1-D) \\) 會變得巨大，導致 \\( I^2 R_L \\) 壓降吃掉所有升壓效果。</p>
+<p>考慮 \\( R_L \\) 後的實際增益修正為：</p>
+<div class="formula-box">
+    $$ \\frac{V_o}{V_in} = \\frac{1}{1-D} \\cdot \\frac{1}{1 + \\frac{R_L}{R(1-D)^2}} $$
+</div>
+<p>當 D 超過一定值（通常 > 0.85），電壓反而會開始<strong>下降</strong>，效率急劇惡化。</p>
+
+<h3>2.3.3 漣波分析：輸入 vs. 輸出</h3>
+<ul>
+    <li><strong>輸入電流漣波 \\( \\Delta i_L \\)：</strong> 由於電感串聯在輸入端，Boost 具有<strong>連續的輸入電流</strong>，對前端電源較友善（低 EMI）。</li>
+    <li><strong>輸出電壓漣波 \\( \\Delta v_o \\)：</strong> 這是 Boost 的弱點。在開關導通期間，電容必須<strong>獨自支撐負載</strong>（沒有電流流入）。這導致其漣波遠大於 Buck。
+    <div class="formula-box">
+        $$ \\Delta v_o = \\frac{I_o \\cdot D}{C f_{sw}} + I_{peak} \\cdot ESR $$
+    </div>
+    </li>
+</ul>
+
+<h3>2.3.4 右半平面零點 (Right Half Plane Zero, RHPZ)</h3>
+<p>Boost 在動態響應上有一個惡名昭彰的特性。</p>
+<p>當負載突然增加，迴授控制試圖增加 \\( D \\) 來拉升電壓。然而：
+<ol>
+    <li>D 增加 \\(\\rightarrow\\) (1-D) 減少 \\(\\rightarrow\\) 二極體導通時間縮短。</li>
+    <li>雖然電感電流最終會上升，但在變化的<strong>瞬間</strong>，送到輸出的能量 \\( (1-D) \\cdot i_L \\) 反而減少了！</li>
+    <li>結果：<strong>電壓會先下降（Dip），然後才上升。</strong></li>
+</ol>
+這在控制理論中稱為 RHPZ，限制了 Boost 的頻寬設計。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 基礎計算</h4>
+    <p><strong>Q1：</strong> 輸入 5V，目標輸出 12V。若忽略損耗，求佔空比 \\( D \\)。若負載電流 1A，求平均輸入電流。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. \\( 12 = 5 / (1-D) \\Rightarrow 1-D = 5/12 \\Rightarrow D \\approx 0.583 \\)<br>
+        2. 功率守恆 \\( P_{in} = P_{out} \\Rightarrow 5 \\cdot I_{in} = 12 \\cdot 1 \\Rightarrow I_{in} = 2.4A \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 元件應力</h4>
+    <p><strong>Q2：</strong> 承上題，開關 (MOSFET) 與二極體在截止時，需承受的最大電壓 \\( V_{stress} \\) 是多少？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        在 Boost 中，當開關截止時，其兩端並聯於輸出電容（透過導通的二極體），故耐壓需求為 \\( V_o = 12V \\)。(實務上需加 20%~50% 餘裕以應付切換突波)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 漣波比較</h4>
+    <p><strong>Q3：</strong> 為什麼相同規格下 (電感、電容、頻率、負載皆相同)，Boost 的輸出電壓漣波通常比 Buck 大很多？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Buck 的輸出電容接收的是連續的電感漣波電流（三角波）；Boost 的輸出電容接收的是脈衝電流（有電流 / 無電流）。在開關導通期間 \\( DT_s \\)，Boost 電容必須全權負責負載電流，導致電壓下降幅度大 \\( \\Delta V = (I_o \\cdot D \\cdot T) / C \\)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 實務限制</h4>
+    <p><strong>Q4：</strong> 某工程師試圖用單級 Boost 將 12V 升壓至 200V (D=0.94)。電路一上電，輸出電壓卻只有 150V 且 MOSFET 發燙嚴重。請利用「寄生電阻效應」解釋。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        在 D=0.94 下，輸入電流約為輸出的 16 倍。巨大的 \\( I^2 R \\) 損耗（來自電感與 MOSFET）導致有效增益大幅下降。這已進入「增益反轉區」，D 越高，電壓反而越低，且能量都轉成了熱。應改用返馳式 (Flyback) 或串接結構。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 安全機制</h4>
+    <p><strong>Q5：</strong> (思考題) 若 Boost Converter 運作中負載突然開路 (Open Loop)，會發生什麼事？Buck Converter 會有同樣問題嗎？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Boost 會燒毀。因為每個週期電感都會把能量 \\( LI^2/2 \\) 灌入電容，若無負載消耗，電容電壓會無限上升直到擊穿元件。Buck 不會，因為其 \\( V_o \\) 最大僅等於 \\( V_{in} \\)。因此 Boost <strong>必須</strong> 設計過壓保護 (OVP)。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch2-4",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.4 升降壓轉換器與高階拓撲 (Buck-Boost & Cuk/SEPIC)",
+                content: `
+                    <div class="content-body">
+<p>當輸入電壓範圍涵蓋了輸出電壓（例如鋰電池 3.0V~4.2V 轉 3.3V）時，單純的 Buck 或 Boost 皆無法滿足需求。本節將探討能升能降的轉換器拓撲，及其在極性反轉與漣波抑制上的特性。</p>
+
+<h3>2.4.1 反極性 Buck-Boost Converter</h3>
+<p>這是最精簡的升降壓電路，僅需一個開關、一個電感、一個二極體。但代價是<strong>輸出電壓極性相反</strong>（正入負出）。</p>
+
+<div class="figure-box">
+    <img src="images/2.4_buck_boost_circuit.jpg" alt="反極性 Buck-Boost 轉換器電路圖與電流路徑">
+    <div class="figure-caption">圖 2.4.1：Buck-Boost 電路：開關導通時電感儲能；開關截止時，電感電流被迫流向地，導致輸出端變為負電位。</div>
+</div>
+
+<h4>工作原理與增益推導</h4>
+<ul>
+    <li><strong>ON 狀態：</strong> 電源對電感充電。 \\( v_L = V_{in} \\)</li>
+    <li><strong>OFF 狀態：</strong> 電感對電容放電。注意二極體方向，電流流出電容下極板，故 \\( v_L = V_o \\) (定義 \\( V_o < 0 \\))，或者是 \\( v_L = -|V_o| \\)。</li>
+</ul>
+<p>利用伏秒平衡：</p>
+<div class="formula-box">
+    $$ V_{in} D + (-|V_o|)(1-D) = 0 $$
+    $$ \\frac{V_o}{V_{in}} = - \\frac{D}{1-D} $$
+</div>
+<p>當 \\( D < 0.5 \\) 為降壓； \\( D > 0.5 \\) 為升壓。這解釋了其名稱由來。</p>
+
+<h3>2.4.2 元件應力 (Component Stress)</h3>
+<p>Buck-Boost 的缺點在於開關與二極體必須承受更高的電壓應力。</p>
+<div class="formula-box">
+    $$ V_{stress} = V_{in} + |V_o| $$
+</div>
+<p>例如輸入 12V 轉 -12V，開關需承受 24V（加上餘裕可能需選 40V 等級），這比 Buck 或 Boost 都來得嚴苛。</p>
+
+<h3>2.4.3 進階拓撲：Cuk 與 SEPIC</h3>
+<p>為了解決 Buck-Boost 輸入/輸出電流不連續（漣波大）以及極性反轉的問題，工程師發展出了第四階 (Fourth-order) 轉換器，包含兩顆電感與兩顆電容。</p>
+
+<div class="figure-box">
+    <img src="images/2.4_cuk_sepic.jpg" alt="Cuk 轉換器與 SEPIC 轉換器的電路拓撲比較">
+    <div class="figure-caption">圖 2.4.2：(a) Cuk Converter：利用電容傳遞能量，輸入輸出電流皆連續；(b) SEPIC Converter：非反相輸出，適合電池應用。</div>
+</div>
+
+<h4>Cuk Converter (庫克轉換器)</h4>
+<ul>
+    <li><strong>特點：</strong> 輸入與輸出端各有一顆電感。</li>
+    <li><strong>優勢：</strong> 輸入電流與輸出電流<strong>皆為連續</strong> (Low Ripple)，EMI 表現極佳。</li>
+    <li><strong>限制：</strong> 輸出極性依然是<strong>反向</strong>的。能量透過中間的電容 \\( C_{transfer} \\) 傳遞。</li>
+</ul>
+
+<h4>SEPIC (Single-Ended Primary-Inductor Converter)</h4>
+<ul>
+    <li><strong>特點：</strong> 將 Cuk 的二極體與電感位置互換。</li>
+    <li><strong>優勢：</strong> 輸出電壓<strong>同相</strong> (正入正出)。這使得它成為電池供電系統的首選（如 3V~4.2V 轉 3.3V）。</li>
+    <li><strong>挑戰：</strong> 中間的耦合電容 \\( C_s \\) 必須承受高漣波電流。</li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 增益計算</h4>
+    <p><strong>Q1：</strong> 使用 Buck-Boost 電路，輸入 12V，欲產生 -5V 輸出。求佔空比 \\( D \\)。(忽略二極體壓降)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        公式：\\( |V_o| = V_{in} \\frac{D}{1-D} \\)<br>
+        \\( 5 = 12 \\frac{D}{1-D} \\Rightarrow 5(1-D) = 12D \\)<br>
+        \\( 5 = 17D \\Rightarrow D \\approx 0.294 \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 應力分析</h4>
+    <p><strong>Q2：</strong> 承上題，若改用 Cuk 轉換器產生 -5V。請問開關 (MOSFET) 截止時承受的電壓是多少？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Cuk 與 Buck-Boost 類似，開關應力均為 \\( V_{in} + |V_o| \\)。<br>
+        \\( V_{sw} = 12V + 5V = 17V \\)。<br>
+        這也是為什麼這類拓撲在高壓應用較少見的原因。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 拓撲選擇</h4>
+    <p><strong>Q3：</strong> 某行動裝置使用單顆鋰電池 (3.0V ~ 4.2V) 供電，需要穩定的 3.3V 輸出給 Wi-Fi 模組。你會推薦使用 Buck、Boost 還是 SEPIC？為什麼？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>推薦 SEPIC (或 Buck-Boost)。</strong><br>
+        原因：輸入電壓範圍橫跨了輸出電壓 (3.0 < 3.3 < 4.2)。<br>
+        - 若用 Buck：當電池低於 3.3V 時無法穩壓。<br>
+        - 若用 Boost：當電池充飽 4.2V 時無法穩壓 (且無短路保護)。<br>
+        - SEPIC 可升可降，且輸出同相，最適合此應用。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 電流特性</h4>
+    <p><strong>Q4：</strong> 為什麼說 Cuk Converter 對電磁干擾 (EMI) 的抑制效果比 Buck-Boost 好？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Buck-Boost 的輸入與輸出電流都是脈衝狀 (Pulsating) 的（開關切換導致電流斷續）。而 Cuk 在輸入端與輸出端各串聯了一顆電感，使得 \\( I_{in} \\) 與 \\( I_{o} \\) 都是連續的 (Continuous)，大幅降低了高頻漣波與 EMI 輻射。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 控制理論</h4>
+    <p><strong>Q5：</strong> (思考題) Buck-Boost 和 Boost 一樣，都具有右半平面零點 (RHPZ) 嗎？這對閉迴路頻寬有什麼影響？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        是的，凡是「開關導通時，能量只存不放；開關截止時才釋放能量」的拓撲 (Boost, Buck-Boost)，都具有 RHPZ。這限制了頻寬必須設計得比較低（通常小於 RHPZ 頻率的 1/10），導致動態響應較慢，不如 Buck 轉換器靈敏。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch2-5",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.5 非連續導通模式 (DCM) 深度分析與建模",
+                content: `
+                    <div class="content-body">
+<p>當轉換器的負載變輕 (Light Load) 或電感值過小，電感電流在開關週期結束前就已經降至零。由於二極體不允許電流逆流，電感電流將會「斷開」並維持在零，直到下一個週期開始。這種狀態稱為非連續導通模式 (Discontinuous Conduction Mode, DCM)。</p>
+
+<h3>2.5.1 CCM 與 DCM 的物理邊界</h3>
+<p>理解 DCM 的關鍵在於觀察電感電流 \\( i_L(t) \\) 的波形變化。</p>
+
+<div class="figure-box">
+    <img src="images/2.5_ccm_vs_dcm.jpg" alt="CCM、BCM 與 DCM 三種模式下的電感電流波形比較圖">
+    <div class="figure-caption">圖 2.5.1：隨著負載電流 \\( I_{load} \\) 下降，電流波形整體下移，直到谷底觸碰零軸 (BCM)，最後進入斷續狀態 (DCM)。</div>
+</div>
+
+<h4>邊界導通模式 (Boundary Conduction Mode, BCM)</h4>
+<p>這是 CCM 與 DCM 的臨界點。此時電流的最小值剛好為零。這意味著直流平均電流 \\( I_L \\) 剛好等於漣波電流的一半：</p>
+<div class="formula-box">
+    $$ I_{L, avg} = \\frac{1}{2} \\Delta i_L $$
+</div>
+
+<h4>臨界參數推導 (以 Buck 為例)</h4>
+<p>將 Buck 的漣波公式 \\( \\Delta i_L = \\frac{V_o(1-D)T_s}{L} \\) 與平均電流 \\( I_o = V_o/R \\) 代入上式，可求得**臨界電感值** \\( L_{crit} \\)：</p>
+<div class="formula-box">
+    $$ \\frac{V_o}{R} = \\frac{1}{2} \\cdot \\frac{V_o(1-D)T_s}{L} $$
+    $$ L_{crit} = \\frac{(1-D)R T_s}{2} $$
+</div>
+<div class="note-box">
+    <strong>設計判斷：</strong> 
+    <ul>
+        <li>若 \\( L > L_{crit} \\)，電路運作於 <strong>CCM</strong>。</li>
+        <li>若 \\( L < L_{crit} \\)，電路運作於 <strong>DCM</strong>。</li>
+    </ul>
+    注意：由於 \\( L_{crit} \\) 與負載電阻 \\( R \\) 成正比，這代表<strong>負載越輕 (R 越大)，越容易進入 DCM</strong>。
+</div>
+
+<h3>2.5.2 DCM 下的電壓增益推導 (Buck)</h3>
+<p>在 DCM 中，輸出電壓不再單純由 \\( D \\) 決定，而是變成負載 \\( R \\)、電感 \\( L \\)、頻率 \\( f_{sw} \\) 的函數。這使得系統從一階線性變成複雜的非線性系統。</p>
+
+<h4>定義三個時段</h4>
+<ol>
+    <li><strong>\\( D_1 T_s \\) (導通)：</strong> 開關 ON，電流上升。</li>
+    <li><strong>\\( D_2 T_s \\) (續流)：</strong> 開關 OFF，電流下降至零。注意在 DCM 中，\\( D_1 + D_2 < 1 \\)。</li>
+    <li><strong>\\( D_3 T_s \\) (閒置)：</strong> 電流維持為零，直到週期結束。</li>
+</ol>
+
+<h4>推導過程</h4>
+<p>利用伏秒平衡 (Volt-Second Balance)，正面積必須等於負面積：</p>
+<div class="formula-box">
+    $$ (V_{in} - V_o) D_1 T_s = V_o D_2 T_s \\quad \\Rightarrow \\quad \\frac{V_o}{V_{in}} = \\frac{D_1}{D_1 + D_2} $$
+</div>
+<p>再來計算平均電感電流 (即負載電流 \\( V_o/R \\))，它等於三角形波形的面積除以週期：</p>
+<div class="formula-box">
+    $$ I_o = \\frac{1}{T_s} \\left( \\frac{1}{2} i_{pk} (D_1 + D_2) T_s \\right) = \\frac{V_o}{R} $$
+</div>
+<p>經過代換與求解二次方程式 (過程繁瑣，此處直接給出經典結果)，我們引入無因次參數 \\( K = \\frac{2L}{R T_s} \\)，可得 Buck 在 DCM 下的增益公式：</p>
+<div class="formula-box">
+    $$ M_{DCM} = \\frac{V_o}{V_{in}} = \\frac{2}{1 + \\sqrt{1 + \\frac{4K}{D^2}}} $$
+</div>
+
+<h3>2.5.3 DCM 的轉換特性與影響</h3>
+<p>觀察上述公式，我們會發現一個驚人的事實：<strong>當負載電流趨近於零 (R 趨近無限大，K 趨近 0) 時，增益 M 趨近於 1 (即 \\( V_o = V_{in} \\))。</strong></p>
+
+<div class="figure-box">
+    <img src="images/2.5_gain_curve.jpg" alt="Buck Converter 電壓增益 M 對負載參數 K 的變化曲線 (CCM vs DCM)">
+    <div class="figure-caption">圖 2.5.2：轉換特性曲線。當 K > Kcrit 時為水平直線 (CCM，M=D)；當 K < Kcrit 時曲線翹起 (DCM)，電壓隨負載變輕而上升。</div>
+</div>
+
+<h4>DCM 的優缺點分析</h4>
+<ul>
+    <li><strong>優點：</strong>
+        <ul>
+            <li><strong>零電流切換 (ZCS) 開啟：</strong> 開關導通瞬間電流從零開始，開啟損耗極低。</li>
+            <li><strong>無二極體反向恢復問題：</strong> 因為二極體電流是自然降至零，沒有 \\( Q_{rr} \\) 損耗。</li>
+            <li>電感值較小，體積較小。</li>
+        </ul>
+    </li>
+    <li><strong>缺點：</strong>
+        <ul>
+            <li><strong>漣波電流極大：</strong> 導致輸出電容 ESR 損耗與核心損耗增加。</li>
+            <li><strong>控制困難：</strong> 轉移函數隨負載變動，且動態響應從二階系統退化為一階系統 (極點移動)，補償器設計複雜。</li>
+        </ul>
+    </li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 邊界判斷</h4>
+    <p><strong>Q1：</strong> 一個 Buck Converter，\\( L=100\\mu H, R=10\\Omega, f_{sw}=100kHz, D=0.4 \\)。請問電路是運作在 CCM 還是 DCM？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. 計算臨界電感 \\( L_{crit} \\)：<br>
+        $$ L_{crit} = \\frac{(1-D)R}{2f} = \\frac{0.6 \\cdot 10}{2 \\cdot 100k} = \\frac{6}{200000} = 30\\mu H $$<br>
+        2. 比較：實際 \\( L = 100\\mu H > 30\\mu H \\)。<br>
+        <strong>結論：</strong> 電路運作於 <strong>CCM</strong> (深度的連續模式)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 輕載電壓計算</h4>
+    <p><strong>Q2：</strong> 承上題，若負載被移除，電阻變成 \\( R=1k\\Omega \\)。請問此時若佔空比 D 維持 0.4 不變，輸出電壓會變成多少？(輸入 \\( V_{in}=12V \\))</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. 重算 \\( L_{crit} = \\frac{0.6 \\cdot 1000}{200k} = 3000\\mu H \\)。因為 \\( 100\\mu H < 3000\\mu H \\)，進入 <strong>DCM</strong>。<br>
+        2. 計算參數 \\( K = \\frac{2L}{RT_s} = \\frac{200\\mu}{1k \\cdot 10\\mu} = 0.02 \\)。<br>
+        3. 代入 DCM 增益公式：<br>
+        $$ M = \\frac{2}{1 + \\sqrt{1 + 4(0.02)/0.4^2}} = \\frac{2}{1 + \\sqrt{1 + 0.5}} \\approx \\frac{2}{2.225} \\approx 0.899 $$<br>
+        \\( V_o = 0.899 \\cdot 12V \\approx 10.79V \\)。<br>
+        <strong>結論：</strong> 電壓從原本 CCM 的 4.8V 飆升到 10.79V！這就是為什麼閉迴路控制在輕載時必須大幅降低 D 的原因。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 設計取捨</h4>
+    <p><strong>Q3：</strong> 為什麼有些反激式 (Flyback) 變壓器設計會刻意讓電路運作在 DCM 模式？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        DCM 下，一次側電流從零開始 (ZCS Turn-on)，且二次側二極體電流自然歸零，沒有反向恢復損耗 (No Diode Recovery Loss)。這對於高壓輸出或低功率應用來說，能顯著提升效率並降低 EMI，儘管代價是峰值電流較大。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 Boost 的 DCM</h4>
+    <p><strong>Q4：</strong> Boost Converter 在 DCM 模式下，是否會有「輸出電壓失控」的風險？(假設有閉迴路控制)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        在閉迴路控制下不會失控，控制器會降低 D。但值得注意的是，Boost 在 DCM 下，其右半平面零點 (RHPZ) 的效應會減弱甚至消失 (取決於拓撲細節)，且系統階數降低，反而比 CCM 模式下的 Boost 更容易穩定控制。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 同步整流與 DCM</h4>
+    <p><strong>Q5：</strong> (思考題) 如果我們使用同步整流 (MOSFET 取代二極體) 的 Buck Converter，還會發生 DCM 嗎？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>不會 (除非刻意控制)。</strong><br>
+        MOSFET 是雙向導通的。當電感電流降至零時，二極體會截止 (DCM)，但 MOSFET 允許電流反向流動 (從輸出流回輸入)。這稱為強制連續導通模式 (FCCM)。電路始終保持 CCM 特性，電壓增益 \\( M=D \\) 恆定，解決了輕載電壓漂移問題，但會有額外的循環電流損耗。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch2-6",
+                category: "第二章：非隔離型 DC-DC 轉換器",
+                title: "2.6 非理想效應與效率分析：實務上的痛點",
+                content: `
+                    <div class="content-body">
+<p>在理想分析中，我們假設元件無損耗，效率為 100%。然而在真實世界中，導通電阻、二極體壓降、電感銅損等「非理想效應」不僅會產生熱，還會導致輸出電壓隨負載增加而下降 (Load Regulation)，甚至限制了轉換器的最大升壓能力。</p>
+
+<h3>2.6.1 寄生元件建模 (Parasitic Modeling)</h3>
+<p>為了精確預測電路行為，我們必須將理想元件替換為包含寄生參數的等效模型：</p>
+
+<div class="figure-box">
+    <img src="images/2.6_nonideal_equivalent.jpg" alt="包含寄生電阻 (DCR, Ron) 與二極體壓降的 Buck 轉換器等效電路圖">
+    <div class="figure-caption">圖 2.6.1：真實的 Buck 轉換器模型。電感串聯了 DCR (\\( R_L \\))，MOSFET 串聯了 \\( R_{on} \\)，二極體則由 \\( V_F \\) 與 \\( R_F \\) 組成。</div>
+</div>
+
+<ul>
+    <li><strong>電感：</strong> \\( L \\) 串聯直流電阻 \\( R_L \\) (DCR)。這是大電流應用中的主要損耗源。</li>
+    <li><strong>MOSFET：</strong> 導通時等效為電阻 \\( R_{on} \\)。</li>
+    <li><strong>二極體：</strong> 導通時等效為電壓源 \\( V_F \\) 串聯動態電阻 \\( R_D \\)。</li>
+    <li><strong>電容：</strong> 串聯等效電阻 \\( ESR \\)。</li>
+</ul>
+
+<h3>2.6.2 對電壓增益的影響 (Voltage Droop)</h3>
+<p>非理想效應會造成「IR 壓降」，導致輸出電壓低於理論值。</p>
+
+<h4>Buck Converter 的修正增益</h4>
+<p>考慮電感伏秒平衡，但在導通與截止路徑上扣除電阻壓降：</p>
+<div class="formula-box">
+    $$ V_o = D V_{in} - I_o (R_L + D R_{on} + (1-D)R_D) - (1-D)V_F $$
+</div>
+<p>簡化來看： \\( V_{o, real} \\approx V_{o, ideal} - I_o \\cdot R_{total} \\)。這解釋了為什麼負載電流 \\( I_o \\) 越大，輸出電壓越低。</p>
+
+<h4>Boost Converter 的增益極限</h4>
+<p>Boost 受寄生電阻影響最劇烈。電感電流是輸入電流 \\( I_{in} \\approx I_o / (1-D) \\)，在 D 很大時，輸入電流會變成天文數字，導致 \\( I_{in}^2 R_L \\) 損耗極大。</p>
+<div class="formula-box">
+    $$ \\frac{V_o}{V_{in}} = \\frac{1}{1-D} \\cdot \\frac{1}{1 + \\frac{R_L}{R(1-D)^2}} $$
+</div>
+<div class="note-box">
+    <strong>關鍵結論：</strong> 當 \\( R_L / R (1-D)^2 \\) 這一項變大時，分母迅速增加。這導致 Boost 的實際增益曲線在 \\( D \\approx 0.85 \\sim 0.9 \\) 處會反轉向下。<strong>這就是為什麼單級 Boost 很難做到 10 倍以上升壓的原因。</strong>
+</div>
+
+<h3>2.6.3 效率分析 (Efficiency Analysis)</h3>
+<p>效率 \\( \\eta \\) 定義為輸出功率除以輸入功率：</p>
+<div class="formula-box">
+    $$ \\eta = \\frac{P_{out}}{P_{in}} = \\frac{P_{out}}{P_{out} + P_{loss}} $$
+</div>
+
+<div class="figure-box">
+    <img src="images/2.6_efficiency_curve.jpg" alt="典型的 DC-DC 轉換器效率對負載電流曲線圖 (鐘形曲線)">
+    <div class="figure-caption">圖 2.6.2：典型的效率曲線呈現「鐘形」。輕載受切換損耗 (固定損耗) 拖累；重載受傳導損耗 (\\( I^2 R \\)) 拖累。</div>
+</div>
+
+<ul>
+    <li><strong>輕載區 (Light Load)：</strong> 損耗主要來自<strong>切換損耗</strong> (Switching Loss) 與驅動損耗 (Gate Drive)，這些是固定損耗，不隨負載變小而減少，因此效率低落。解決方案：DCM、Burst Mode。</li>
+    <li><strong>重載區 (Heavy Load)：</strong> 損耗主要來自<strong>傳導損耗</strong> (\\( I^2 R \\))。隨著電流平方增加，效率快速下降。解決方案：降低 \\( R_{on} \\)、加粗導線、同步整流。</li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 基礎壓降</h4>
+    <p><strong>Q1：</strong> 一個 Buck Converter，\\( D=0.5, V_{in}=12V \\)。若負載電流 2A，迴路總寄生電阻 \\( R_{total}=0.5\\Omega \\)。求實際輸出電壓。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        理論電壓 \\( V_{ideal} = 12 \\times 0.5 = 6V \\)。<br>
+        壓降 \\( V_{drop} = I \\times R = 2A \\times 0.5\\Omega = 1V \\)。<br>
+        實際電壓 \\( V_{real} = 6V - 1V = 5V \\)。(誤差高達 16%！)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 效率計算</h4>
+    <p><strong>Q2：</strong> 承上題，計算該轉換器的效率。(假設只有傳導損耗)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        \\( P_{out} = 5V \\times 2A = 10W \\)<br>
+        \\( P_{loss} = I^2 R = 2^2 \\times 0.5 = 2W \\)<br>
+        \\( \\eta = \\frac{10}{10+2} = \\frac{10}{12} \\approx 83.3\\% \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 Boost 極限</h4>
+    <p><strong>Q3：</strong> 你正在設計一個 12V 轉 200V 的 Boost。發現效率極差且電壓升不上去。若將電感從 \\( 100\\mu H (R_L=1\\Omega) \\) 換成 \\( 100\\mu H (R_L=0.1\\Omega) \\) 的大顆電感，情況會改善嗎？為什麼？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>會大幅改善。</strong><br>
+        在高升壓比下，輸入電流極大。Boost 的增益衰減因子取決於 \\( \\frac{R_L}{R(1-D)^2} \\)。降低 \\( R_L \\) 10倍，能顯著減少輸入端的壓降損耗，使實際增益更接近理論值，並提升效率。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 熱跑脫 (Thermal Runaway)</h4>
+    <p><strong>Q4：</strong> MOSFET 的 \\( R_{on} \\) 具有正溫度係數（越熱電阻越大）。這對於並聯 MOSFET 有好處，但對於單顆高負載運作有什麼潛在風險？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        這會導致<strong>正回授 (Positive Feedback)</strong> 循環：<br>
+        溫度上升 \\(\\rightarrow\\) \\( R_{on} \\) 增加 \\(\\rightarrow\\) 傳導損耗 \\( I^2 R \\) 增加 \\(\\rightarrow\\) 溫度再上升。<br>
+        若散熱設計不足，最終會導致元件過熱燒毀 (Thermal Runaway)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 設計取捨</h4>
+    <p><strong>Q5：</strong> 為了提高效率，工程師通常會降低開關頻率 \\( f_{sw} \\)。但這樣做會帶來什麼負面影響？(列舉兩點)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        雖然降低 \\( f_{sw} \\) 可以減少切換損耗 \\( P_{sw} \\)，但代價是：<br>
+        1. <strong>體積變大：</strong> 需要更大的電感 \\( L \\) 和電容 \\( C \\) 來維持相同的漣波規格。<br>
+        2. <strong>動態響應變慢：</strong> 頻寬通常受限於 \\( f_{sw} \\)，頻率越低，對負載變動的反應越慢。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch3-1",
+                category: "第三章：磁性元件設計",
+                title: "3.1 電感器設計基礎：物理定律、氣隙與磁芯選型",
+                content: `
+                    <div class="content-body">
+<p>磁性元件是電力轉換器的心臟。不同於可以隨手買到的電阻電容，功率電感與變壓器通常需要工程師根據電壓、電流與頻率親手設計。本節將從物理定律出發，建立磁路模型，並探討磁芯選型的工程方法。</p>
+
+<h3>3.1.1 兩大物理定律</h3>
+<p>所有的磁性元件設計都建立在兩個核心定律之上：</p>
+
+<div class="figure-box">
+    <img src="images/3.1_bh_curve.jpg" alt="磁性材料的 B-H 磁滯曲線與飽和特性">
+    <div class="figure-caption">圖 3.1.1：磁滯曲線 (B-H Loop)。斜率代表導磁率 \\( \\mu \\)。當 H 增加到一定程度，B 不再上升，即進入磁飽和 (Saturation)。</div>
+</div>
+
+<h4>1. 安培定律 (Ampere's Law) - 磁動勢的來源</h4>
+<p>電流產生磁場。對於繞了 \\( N \\) 匝的線圈：</p>
+<div class="formula-box">
+    $$ N \\cdot i = \\oint H \\cdot dl \\approx H \\cdot l_e $$
+</div>
+<p>其中 \\( Ni \\) 稱為磁動勢 (MMF, \\( \\mathcal{F} \\))，類似電路中的電壓 (EMF)；\\( l_e \\) 為磁路有效長度。</p>
+
+<h4>2. 法拉第定律 (Faraday's Law) - 電壓的感應</h4>
+<p>磁通變化產生電壓。這是變壓器與電感運作的基礎：</p>
+<div class="formula-box">
+    $$ v(t) = N \\frac{d\\phi}{dt} = N A_c \\frac{dB}{dt} $$
+</div>
+<p>這告訴我們：<strong>防止磁飽和 (B 超標) 的關鍵在於限制「伏秒積 (Volt-Second)」</strong>，即 \\( \\int v dt \\)。</p>
+
+<h3>3.1.2 磁路模型與磁阻 (Reluctance)</h3>
+<p>我們可以利用「歐姆定律」的類比來分析磁路：</p>
+<div class="formula-box">
+    $$ \\mathcal{F} = \\phi \\cdot \\mathcal{R} \\quad \\Leftrightarrow \\quad V = I \\cdot R $$
+</div>
+<p>其中磁阻 \\( \\mathcal{R} \\) 定義為：</p>
+<div class="formula-box">
+    $$ \\mathcal{R} = \\frac{l_e}{\\mu A_c} $$
+</div>
+<p>結合上述公式，可推導出電感值 \\( L \\) 的物理定義：</p>
+<div class="formula-box">
+    $$ L = \\frac{N^2}{\\mathcal{R}} = \\frac{N^2 \\mu A_c}{l_e} $$
+</div>
+<div class="note-box">
+    <strong>關鍵結論：</strong> 電感值與匝數的平方 (\\( N^2 \\)) 成正比，與磁阻 (\\( \\mathcal{R} \\)) 成反比。
+</div>
+
+<h3>3.1.3 氣隙的奧義 (The Air Gap)</h3>
+<p>在 Buck/Boost/Flyback 等轉換器中，電感需要儲存能量。但鐵氧體 (Ferrite) 等高導磁材料極易飽和，無法儲存大量能量。</p>
+
+<div class="figure-box">
+    <img src="images/3.1_air_gap.jpg" alt="具有氣隙的磁芯結構與邊緣磁通效應">
+    <div class="figure-caption">圖 3.1.2：在磁路中切出氣隙 (Air Gap, \\( l_g \\))。由於氣隙磁阻遠大於磁芯磁阻，能量主要儲存在氣隙中。</div>
+</div>
+
+<h4>為什麼要切氣隙？</h4>
+<ol>
+    <li><strong>防止飽和：</strong> 氣隙增加了總磁阻 \\( \\mathcal{R} \\)，使得 B-H 曲線「躺平」（斜率變小），允許通過更大的電流而不飽和。</li>
+    <li><strong>儲存能量：</strong> 磁場能量密度 \\( w = \\frac{1}{2} B H \\)。在氣隙中，\\( \\mu_0 \\) 很小，導致 \\( H \\) 極大。因此，<strong>幾乎所有的能量都儲存在氣隙的空氣裡，而不是磁芯裡！</strong></li>
+</ol>
+
+<h3>3.1.4 磁芯選型：\\( A_p \\) 值法 (Area Product)</h3>
+<p>工程師如何決定磁芯要買多大顆？我們使用 \\( A_p \\) 值，它是磁芯「視窗面積 \\( W_a \\)」與「截面積 \\( A_c \\)」的乘積。</p>
+<div class="formula-box">
+    $$ A_p = W_a A_c = \\frac{L \\cdot I_{pk} \\cdot I_{rms}}{K_u \\cdot B_{max} \\cdot J} $$
+</div>
+<ul>
+    <li>\\( L I_{pk} \\)：代表能量需求。</li>
+    <li>\\( B_{max} \\)：材料限制 (通常取 0.3T)。</li>
+    <li>\\( J \\)：電流密度 (散熱限制，通常取 \\( 300 \\sim 500 A/cm^2 \\))。</li>
+    <li>\\( K_u \\)：視窗使用率 (0.4 ~ 0.7)。</li>
+</ul>
+<p>計算出 \\( A_p \\) 後，直接查磁芯型錄 (Datasheet)，選一個 \\( A_p \\) 大於計算值的磁芯即可。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 匝數計算</h4>
+    <p><strong>Q1：</strong> 已知某磁芯的電感係數 \\( A_L = 100 nH/turn^2 \\) (即 \\( L = A_L \\cdot N^2 \\))。若需要 \\( L = 100 \\mu H \\)，請問需要繞幾匝？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        $$ 100 \\mu H = 100 nH \\cdot N^2 $$
+        $$ 100,000 nH = 100 nH \\cdot N^2 $$
+        $$ N^2 = 1000 \\Rightarrow N \\approx 31.6 $$
+        實務上取整數 <strong>32 匝</strong>。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 飽和電流</h4>
+    <p><strong>Q2：</strong> 一個電感繞了 20 匝。若磁路有效長度 \\( l_e = 5cm \\)，且材料在 \\( B=0.3T \\) 時飽和。假設沒有氣隙，相對導磁率 \\( \\mu_r = 2000 \\)。求其飽和電流 \\( I_{sat} \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        利用安培定律 \\( N I = H l_e = \\frac{B}{\\mu} l_e \\)<br>
+        $$ I_{sat} = \\frac{B \\cdot l_e}{N \\cdot \\mu_0 \\mu_r} $$
+        $$ I_{sat} = \\frac{0.3 \\cdot 0.05}{20 \\cdot 4\\pi \\times 10^{-7} \\cdot 2000} \\approx \\frac{0.015}{0.05} \\approx 0.3 A $$
+        <strong>結論：</strong> 沒有氣隙的電感非常容易飽和！
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 氣隙效應</h4>
+    <p><strong>Q3：</strong> 承上題，若我們磨出一個 \\( l_g = 1mm \\) 的氣隙。假設氣隙磁阻遠大於磁芯磁阻，求新的飽和電流。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        主要磁阻由氣隙決定，\\( \\mu_r \\) 變為 1 (空氣)。<br>
+        $$ I_{sat} \\approx \\frac{B \\cdot l_g}{N \\cdot \\mu_0} $$
+        $$ I_{sat} = \\frac{0.3 \\cdot 0.001}{20 \\cdot 4\\pi \\times 10^{-7}} = \\frac{0.0003}{2.51 \\times 10^{-5}} \\approx 11.9 A $$
+        <strong>結論：</strong> 加了 1mm 氣隙後，飽和電流從 0.3A 提升到 11.9A，這就是氣隙的威力。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 能量密度</h4>
+    <p><strong>Q4：</strong> (觀念題) 在一個開了氣隙的電感中，假設 99% 的磁阻都在氣隙上。請問電感儲存的能量主要分佈在哪裡？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>分佈在氣隙 (Air Gap) 裡。</strong><br>
+        能量密度 \\( w = \\frac{1}{2} B H \\)。由於磁通密度 B 在磁路中連續 (處處相等)，但氣隙的導磁率 \\( \\mu_0 \\) 遠小於磁芯的 \\( \\mu \\)，導致氣隙中的磁場強度 \\( H_{gap} = B/\\mu_0 \\) 遠大於磁芯中的 \\( H_{core} \\)。因此絕大部分能量都儲存在空氣隙縫中。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 Ap 選型</h4>
+    <p><strong>Q5：</strong> 為什麼在 \\( A_p \\) 公式中，電感 L 和 峰值電流 \\( I_{pk} \\) 的乘積代表「能量需求」？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        \\( A_p \\) 法本質上是能量平衡：\\( \\text{Stored Energy} \\propto \\text{Core Volume} \\)。<br>
+        \\( L I_{pk} \\) 來自於法拉第定律積分 (\\( N \\Delta \\phi = L I \\))。這個乘積越大，代表需要在磁芯中建立越大的磁通量 (\\( B \\times A_c \\)) 或者需要更多的匝數與銅線空間 (\\( W_a \\))，因此需要更大的磁芯幾何尺寸。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+
+            {
+                id: "ch3-2",
+                category: "第三章：磁性元件設計",
+                title: "3.2 高頻變壓器設計：原理、繞線與損耗分析",
+                content: `
+                    <div class="content-body">
+<p>高頻變壓器負責電壓轉換與電氣隔離。不同於工頻變壓器 (50/60Hz)，高頻變壓器 (kHz~MHz) 體積極小，但必須面對嚴苛的高頻損耗挑戰。本節將從法拉第定律出發，探討變壓器的設計流程與繞線工藝。</p>
+
+<h3>3.2.1 變壓器類別：能量傳遞 vs. 儲存</h3>
+<p>在設計之前，必須先確認你的拓撲類型，因為設計邏輯截然不同：</p>
+<ul>
+    <li><strong>順向式/橋式 (Forward/Bridge)：</strong> 這是「真正的變壓器」。能量即時傳遞 (Instant Power Transfer)。設計重點是限制磁通擺幅 \\( \\Delta B \\) 以避免飽和，通常<strong>不需要氣隙</strong>。</li>
+    <li><strong>返馳式 (Flyback)：</strong> 物理上它是「多繞組電感」。能量先儲存再釋放。設計重點是儲能能力 \\( \\frac{1}{2}LI^2 \\)，<strong>必須切氣隙</strong>以增加儲能密度。</li>
+</ul>
+
+<h3>3.2.2 核心公式：法拉第定律 (Faraday's Law)</h3>
+<p>為了防止磁芯飽和，我們必須計算一次側的「最小匝數」 \\( N_p \\)。根據法拉第定律：</p>
+<div class="formula-box">
+    $$ V_{on} = N_p \\frac{d\\phi}{dt} = N_p A_c \\frac{\\Delta B}{t_{on}} $$
+</div>
+<p>移項後可得變壓器設計的黃金公式：</p>
+<div class="formula-box">
+    $$ N_{min} = \\frac{V_{on} \\cdot t_{on}}{\\Delta B \\cdot A_c} $$
+</div>
+<div class="note-box">
+    <strong>參數選擇：</strong>
+    <ul>
+        <li>\\( V_{on} t_{on} \\)：最大伏秒積 (Volt-Second Product)。</li>
+        <li>\\( A_c \\)：磁芯截面積 (查 Datasheet)。</li>
+        <li>\\( \\Delta B \\)：設計磁通擺幅。通常取 \\( 0.1T \\sim 0.2T \\) 以限制磁芯損耗 (Core Loss)，而非取飽和磁通 \\( B_{sat} (0.3T) \\)。</li>
+    </ul>
+</div>
+
+<h3>3.2.3 高頻繞線效應 (Winding Effects)</h3>
+<p>在高頻下，電流不再均勻分佈於導線截面，這會導致交流電阻 \\( R_{AC} \\) 遠大於直流電阻 \\( R_{DC} \\)，造成線圈過熱。</p>
+
+<div class="figure-box">
+    <img src="images/3.2_skin_effect.jpg" alt="高頻電流在導線中的集膚效應與鄰近效應分佈示意圖">
+    <div class="figure-caption">圖 3.2.1：(a) 集膚效應：電流集中在導線表面；(b) 鄰近效應：相鄰導線磁場擠壓電流分佈。</div>
+</div>
+
+<h4>1. 集膚效應 (Skin Effect)</h4>
+<p>電流傾向於流在導線表面。穿透深度 (Skin Depth, \\( \\delta \\)) 定義為電流密度降為表面 \\( 1/e \\) 的深度：</p>
+<div class="formula-box">
+    $$ \\delta \\approx \\frac{66}{\\sqrt{f}} \\quad (\\text{mm}) $$
+</div>
+<p>例如在 100kHz 時，\\( \\delta \\approx 0.2mm \\)。如果導線直徑大於 \\( 2\\delta \\)，中間的銅材就是浪費的。</p>
+
+<h4>2. 解決方案：絞線與銅箔</h4>
+<ul>
+    <li><strong>Litz Wire (多股絞線)：</strong> 將多根細於 \\( 2\\delta \\) 的漆包線絞合，強迫電流均勻分佈。</li>
+    <li><strong>Copper Foil (銅箔)：</strong> 使用薄銅片繞製，適合大電流應用，但需注意層間電容。</li>
+</ul>
+
+<h3>3.2.4 磁芯選型：變壓器 \\( A_p \\) 法</h3>
+<p>變壓器的 \\( A_p \\) 公式與電感略有不同，它取決於總視在功率 \\( P_t \\)：</p>
+<div class="formula-box">
+    $$ A_p = W_a A_c = \\frac{P_t \\cdot 10^4}{K_u B_{max} f J} $$
+</div>
+<p>這個公式告訴我們：<strong>頻率 \\( f \\) 越高，所需的磁芯越小</strong>。這就是為什麼手機充電器 (100kHz) 比老式變壓器 (60Hz) 小這麼多的原因。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 匝數比計算</h4>
+    <p><strong>Q1：</strong> 全橋轉換器，輸入 310V (DC)，輸出 12V。若佔空比最大為 \\( D=0.8 \\) (變壓器兩側各分擔)，忽略壓降，求理想匝數比 \\( N_p : N_s \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        在全橋中，輸出電壓 \\( V_o = V_{in} \\cdot \\frac{N_s}{N_p} \\cdot D_{max} \\)。<br>
+        \\( 12 = 310 \\cdot \\frac{N_s}{N_p} \\cdot 0.8 \\)<br>
+        \\( \\frac{N_p}{N_s} = \\frac{310 \\cdot 0.8}{12} \\approx 20.6 \\)<br>
+        <strong>結論：</strong> 匝數比約為 20:1 或 21:1。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 最小匝數設計</h4>
+    <p><strong>Q2：</strong> 設計一款 50kHz 的變壓器，輸入 100V，最大導通時間 \\( 10\\mu s \\)。選用 EC-28 磁芯 (\\( A_c = 80 mm^2 \\))。若限制 \\( \\Delta B = 0.2T \\)，求一次側最少要繞幾匝？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        代入公式：<br>
+        $$ N_{min} = \\frac{100V \\cdot 10\\mu s}{0.2T \\cdot 80 \\times 10^{-6} m^2} $$
+        $$ N_{min} = \\frac{1000 \\times 10^{-6}}{16 \\times 10^{-6}} = \\frac{1000}{16} = 62.5 $$
+        <strong>結論：</strong> 至少需要繞 63 匝，否則磁芯會飽和或過熱。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 集膚效應</h4>
+    <p><strong>Q3：</strong> 在 200kHz 的應用中，計算集膚深度 \\( \\delta \\)。若工程師選用直徑 1.0mm 的粗銅線繞製，是否合適？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. \\( \\delta = 66 / \\sqrt{200,000} = 66 / 447 \\approx 0.15 mm \\)。<br>
+        2. 導線直徑 1.0mm (半徑 0.5mm) 遠大於 \\( \\delta \\)。電流只會流在表層 0.15mm 厚度，中心大部分銅材沒用到且會發熱。<br>
+        <strong>結論：</strong> 不合適。應改用多股細線 (例如直徑 0.3mm 以下) 絞合。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 磁芯損耗</h4>
+    <p><strong>Q4：</strong> 為什麼在高頻變壓器設計中，我們通常限制 \\( \\Delta B \\) 在 0.1~0.2T，而不是用到材料的飽和點 (0.3~0.4T)？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        雖然材料飽和點高，但磁芯損耗 (Core Loss) 與 \\( \\Delta B \\) 的 2.x 次方成正比 (Steinmetz Equation)。在高頻下，若 \\( \\Delta B \\) 太大，磁芯會因磁滯損耗與渦流損耗而嚴重發燙。因此設計限制通常是「熱限制」而非「飽和限制」。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 拓撲差異</h4>
+    <p><strong>Q5：</strong> (思考題) 為什麼 Forward 變壓器通常不加氣隙，而 Flyback 變壓器必須加氣隙？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Forward 變壓器在導通時即時傳遞能量，磁芯僅作為磁通通道，不儲能，加氣隙會增加激磁電流 (損耗)。<br>
+        Flyback 變壓器在導通時<strong>儲存能量</strong>，這時二次側斷開。若無氣隙，高導磁率磁芯極易飽和，無法儲存足夠能量 (\\( \\frac{1}{2}LI^2 \\))。氣隙提供了儲能的空間。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+        ];
+
+        // === 程式邏輯區 ===
+        
+        function init() {
+            renderMenu();
+            loadContent(bookData[0].id); // 預設載入第一頁
+        }
+
+        function renderMenu() {
+            const menuContainer = document.getElementById('menu-container');
+            let currentCategory = '';
+
+            bookData.forEach(item => {
+                // 如果是新的分類，加入分類標題
+                if (item.category !== currentCategory) {
+                    const categoryLi = document.createElement('li');
+                    categoryLi.className = 'menu-category';
+                    categoryLi.textContent = item.category;
+                    menuContainer.appendChild(categoryLi);
+                    currentCategory = item.category;
+                }
+
+                // 加入章節按鈕
+                const li = document.createElement('li');
+                li.className = 'menu-item';
+                li.textContent = item.title;
+                li.onclick = () => loadContent(item.id);
+                li.id = `menu-${item.id}`;
+                menuContainer.appendChild(li);
+            });
+        }
+
+        function loadContent(id) {
+            // 1. 找到對應的內容
+            const page = bookData.find(item => item.id === id);
+            if (!page) return;
+
+            // 2. 更新右側畫面
+            document.getElementById('content-display').innerHTML = page.content;
+            
+            // 3. 更新選單啟用狀態
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`menu-${id}`).classList.add('active');
+
+            // 4. 重新渲染數學公式 (MathJax)
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // 啟動
+        init();
+
+    </script>
+</body>
+</html>
