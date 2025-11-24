@@ -1705,6 +1705,152 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
                     </div>
                 `
             },
+            
+            {
+                id: "ch4-1",
+                category: "第四章：隔離型 DC-DC 轉換器",
+                title: "4.1 返馳式轉換器 (Flyback)：原理、應力與 RCD 緩衝設計",
+                content: `
+                    <div class="content-body">
+<p>返馳式轉換器 (Flyback Converter) 是 150W 以下應用（如手機充電器、IoT 裝置）的霸主。它結構簡單，僅需一顆磁性元件即可同時實現「電壓轉換」、「電氣隔離」與「多組輸出」。</p>
+
+<h3>4.1.1 電路拓撲與工作原理</h3>
+<p>Flyback 本質上是 <strong>Buck-Boost</strong> 的變形。我們將電感分開成兩個繞組（一次側 \\( N_p \\) 與二次側 \\( N_s \\)），實現隔離。</p>
+
+<div class="figure-box">
+    <img src="images/4.1_flyback_circuit.jpg" alt="Flyback 轉換器電路圖與 CCM 關鍵波形 (Vds, Id, Vsec)">
+    <div class="figure-caption">圖 4.1.1：Flyback 電路操作：(a) 開關導通時，能量存於磁芯氣隙；(b) 開關截止時，能量傳送至二次側。注意變壓器同名端 (Dot) 極性相反。</div>
+</div>
+
+<h4>工作階段 (CCM)</h4>
+<ol>
+    <li><strong>開關導通 (Switch ON)：</strong>
+        <ul>
+            <li>一次側繞組 \\( N_p \\) 承受 \\( V_{in} \\)，電流線性上升，磁芯儲能。</li>
+            <li>由於同名端極性相反，二次側二極體 <strong>逆偏截止</strong>。負載由電容 \\( C \\) 供電。</li>
+            <li><strong>關鍵：</strong> 此時變壓器就像一個純電感 \\( L_m \\)。</li>
+        </ul>
+    </li>
+    <li><strong>開關截止 (Switch OFF)：</strong>
+        <ul>
+            <li>一次側電流切斷，磁場崩塌導致極性反轉。</li>
+            <li>二次側二極體 <strong>導通</strong>，儲存的能量釋放到負載。</li>
+            <li>一次側開關承受電壓 \\( V_{ds} = V_{in} + V_{reflect} \\)。</li>
+        </ul>
+    </li>
+</ol>
+
+<h3>4.1.2 轉換函數推導</h3>
+<p>利用磁化電感 \\( L_m \\) 的伏秒平衡。
+<br>導通時電壓為 \\( V_{in} \\)，截止時電壓被箝位在反射電壓 \\( -n V_o \\) (其中匝數比 \\( n = N_p/N_s \\))：</p>
+<div class="formula-box">
+    $$ V_{in} D + (-n V_o)(1-D) = 0 $$
+    $$ V_o = V_{in} \\frac{D}{1-D} \\cdot \\frac{N_s}{N_p} $$
+</div>
+<div class="note-box">
+    <strong>設計自由度：</strong> 與 Buck-Boost 相比，Flyback 多了匝數比 \\( N_s/N_p \\) 這個參數，可以更靈活地匹配輸入與輸出電壓範圍。
+</div>
+
+<h3>4.1.3 實務痛點：漏感與電壓突波</h3>
+<p>理想變壓器耦合係數 \\( k=1 \\)，但實際上總會有<strong>漏感 (Leakage Inductance, \\( L_{lk} \\))</strong>。漏感儲存的能量 \\( \\frac{1}{2} L_{lk} I_{pk}^2 \\) 無法傳遞到二次側。</p>
+<p>當開關關閉瞬間，這股無處可去的能量會撞擊 MOSFET，產生極高的電壓尖峰 (Voltage Spike)：</p>
+<div class="formula-box">
+    $$ V_{ds, peak} = V_{in} + n V_o + V_{spike} $$
+</div>
+<p>若不處理，MOSFET 會瞬間擊穿炸裂。</p>
+
+<h3>4.1.4 RCD 緩衝電路 (Snubber) 設計</h3>
+<p>為了解決漏感突波，我們必須在一次側增加 <strong>RCD 箝位電路</strong>。</p>
+
+<div class="figure-box">
+    <img src="images/4.1_rcd_snubber.jpg" alt="RCD 緩衝電路結構與 Vds 箝位波形示意圖">
+    <div class="figure-caption">圖 4.1.2：RCD Snubber 由電阻(R)、電容(C)與二極體(D)組成，用於吸收漏感能量並將電壓箝位在安全範圍。</div>
+</div>
+
+<ul>
+    <li><strong>運作：</strong> 漏感能量對電容 C 充電，電壓被箝位。</li>
+    <li><strong>消耗：</strong> 電阻 R 負責把 C 吸收的能量消耗掉（轉成熱）。</li>
+    <li><strong>損耗估算：</strong> RCD 電阻上的功率損耗約為：
+        <div class="formula-box">
+            $$ P_{snubber} \\approx \\frac{1}{2} L_{lk} I_{pk}^2 \\cdot f_{sw} \\cdot \\frac{V_{clamp}}{V_{clamp} - n V_o} $$
+        </div>
+    </li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 基礎增益</h4>
+    <p><strong>Q1：</strong> 輸入 310V (DC)，輸出 12V。變壓器匝數比 \\( N_p:N_s = 10:1 \\)。求佔空比 \\( D \\)。(忽略二極體壓降)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        反射電壓 \\( V_{or} = n V_o = 10 \\times 12 = 120V \\)。<br>
+        Flyback 公式： \\( V_{or} = V_{in} \\frac{D}{1-D} \\)<br>
+        \\( 120 = 310 \\frac{D}{1-D} \\Rightarrow 12(1-D) = 31D \\)<br>
+        \\( 12 = 43D \\Rightarrow D \\approx 0.279 \\)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 開關應力</h4>
+    <p><strong>Q2：</strong> 承上題，若漏感造成的突波電壓 \\( V_{spike} \\) 為 80V。求 MOSFET 截止時需承受的最高電壓 \\( V_{ds, max} \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        MOSFET 承受三部分電壓疊加：<br>
+        1. 輸入電壓 \\( V_{in} = 310V \\)<br>
+        2. 反射電壓 \\( n V_o = 120V \\)<br>
+        3. 漏感突波 \\( V_{spike} = 80V \\)<br>
+        $$ V_{ds, max} = 310 + 120 + 80 = 510V $$<br>
+        <strong>選型建議：</strong> 至少需選用 600V 或 650V 的 MOSFET。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 DCM 邊界</h4>
+    <p><strong>Q3：</strong> Flyback 的 DCM 條件與 Buck-Boost 類似。為什麼實務上很多 Flyback 充電器設計在 DCM 模式？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. <strong>體積更小：</strong> DCM 電感量需求較小。<br>
+        2. <strong>更穩定的控制：</strong> 沒有右半平面零點 (RHPZ) 的問題，頻寬可以拉高。<br>
+        3. <strong>效率考量：</strong> DCM 模式下，二次側二極體電流自然歸零，沒有反向恢復損耗 (Reverse Recovery Loss)，這對高壓輸出特別重要。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 漏感能量</h4>
+    <p><strong>Q4：</strong> 某變壓器一次側電感 \\( L_p = 500\\mu H \\)，漏感為總電感的 2% (\\( 10\\mu H \\))。若峰值電流 \\( I_{pk} = 2A \\)。求每個週期漏感產生的廢熱能量。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        能量公式 \\( E = \\frac{1}{2} L I^2 \\)。<br>
+        $$ E_{leakage} = 0.5 \\times 10\\mu H \\times (2A)^2 = 20 \\mu J $$
+        若頻率 \\( 100kHz \\)，則功率損耗 \\( P = 20\\mu J \\times 100k = 2W \\)。<br>
+        這 2W 必須靠 RCD 電阻散熱掉，這就是為什麼 Snubber 電阻通常很大顆且很燙。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 實務除錯</h4>
+    <p><strong>Q5：</strong> 在示波器上觀察 Flyback 的 MOSFET 電壓波形，發現在 \\( V_{ds} \\) 降回 \\( V_{in} \\) 之前（DCM 振鈴階段），波形呈現衰減的正弦震盪。這是什麼造成的？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        這是由 <strong>磁化電感 \\( L_m \\) 與 MOSFET 寄生電容 \\( C_{oss} \\)</strong> 產生的 LC 諧振。當二次側電流降至零（二極體截止），一次側繞組變成開路，殘留的能量便在 \\( L_m \\) 與 \\( C_{oss} \\) 之間來回震盪，直到被損耗殆盡。這是 DCM 的特徵波形。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
         ];
 
         // === 程式邏輯區 ===
@@ -1761,4 +1907,5 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
 
     </script>
 </body>
+
 </html>
