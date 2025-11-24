@@ -1851,6 +1851,269 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
                     </div>
                 `
             },
+            
+            {
+                id: "ch4-2",
+                category: "第四章：隔離型 DC-DC 轉換器",
+                title: "4.2 順向式轉換器 (Forward)：磁通重置與 Buck 衍生原理",
+                content: `
+                    <div class="content-body">
+<p>當功率需求超過 150W 時，Flyback 的高峰值電流會導致效率低落。此時，順向式轉換器 (Forward Converter) 成為首選。它本質上是一個<strong>「帶有隔離變壓器的 Buck Converter」</strong>。</p>
+
+<h3>4.2.1 電路拓撲與工作原理</h3>
+<p>Forward 與 Flyback 最大的差異在於：<strong>變壓器同名端 (Dot) 極性相同</strong>。這意味著開關導通時，能量直接傳遞到二次側。</p>
+
+<div class="figure-box">
+    <img src="images/4.2_forward_circuit.jpg" alt="包含重置繞組 (Nr) 的單晶體順向式轉換器電路圖">
+    <div class="figure-caption">圖 4.2.1：典型單晶體 Forward 電路。注意變壓器有三個繞組：一次側 \\( N_p \\)、二次側 \\( N_s \\)、重置繞組 \\( N_r \\)。輸出端有一個獨立的儲能電感 \\( L_o \\)。</div>
+</div>
+
+<h4>工作階段 (CCM)</h4>
+<ol>
+    <li><strong>開關導通 (Switch ON)：</strong>
+        <ul>
+            <li>變壓器將 \\( V_{in} \\) 耦合至二次側，電壓為 \\( V_{in} \\frac{N_s}{N_p} \\)。</li>
+            <li>二次側二極體 \\( D_1 \\) 導通，電流流經輸出電感 \\( L_o \\) 並對負載供電（同時 \\( L_o \\) 儲能）。</li>
+            <li><strong>關鍵：</strong> 變壓器本身不儲存能量，只負責傳遞。但磁化電感 \\( L_m \\) 會被充電，產生磁化電流。</li>
+        </ul>
+    </li>
+    <li><strong>開關截止 (Switch OFF)：</strong>
+        <ul>
+            <li>變壓器一次側斷開，無能量傳遞。</li>
+            <li>二次側 \\( D_1 \\) 截止，續流二極體 \\( D_2 \\) 導通，由 \\( L_o \\) 釋放能量給負載（就像 Buck 一樣）。</li>
+            <li><strong>磁通重置：</strong> 磁化電流必須尋找路徑釋放，否則磁芯會飽和。</li>
+        </ul>
+    </li>
+</ol>
+
+<h3>4.2.2 轉換函數推導</h3>
+<p>這可以完全類比 Buck Converter。二次側看到的電壓是一個振幅為 \\( V_{in} \\frac{N_s}{N_p} \\)、佔空比為 \\( D \\) 的方波。</p>
+<p>經過 \\( L_o \\) 與 \\( C \\) 的濾波，輸出電壓為該方波的平均值：</p>
+<div class="formula-box">
+    $$ V_o = V_{in} \\cdot \\frac{N_s}{N_p} \\cdot D $$
+</div>
+
+<h3>4.2.3 核心痛點：磁通重置 (Flux Reset)</h3>
+<p>這是 Forward 設計最困難的地方。由於變壓器沒有氣隙，開關導通時累積的磁化電流 \\( i_m \\) 必須在截止期間完全釋放 (Reset) 回零，否則磁通 \\( B \\) 會像樓梯一樣逐週期累積 (Staircasing)，直到磁芯飽和炸機。</p>
+
+<div class="figure-box">
+    <img src="images/4.2_flux_reset.jpg" alt="Forward 變壓器的 B-H 磁滯迴線操作軌跡">
+    <div class="figure-caption">圖 4.2.2：磁通運作於第一象限。必須確保在 \\( T_{off} \\) 期間，磁通能從 \\( B_{max} \\) 回到剩磁點 \\( B_r \\) (Reset)。</div>
+</div>
+
+<h4>解決方案：重置繞組 (Reset Winding)</h4>
+<p>我們增加第三個繞組 \\( N_r \\) (通常 \\( N_r = N_p \\))，並串聯一個二極體接回輸入電源。當開關 OFF 時，磁化電流透過 \\( N_r \\) 將能量回饋給 \\( V_{in} \\)，同時在一次側產生反向電壓將磁通歸零。</p>
+
+<h4>最大佔空比限制</h4>
+<p>為了保證磁通能「完全」重置，重置時間必須小於截止時間。若 \\( N_r = N_p \\)，則限制為：</p>
+<div class="formula-box">
+    $$ t_{on} \\le t_{reset} \\quad \\Rightarrow \\quad D \\le 0.5 $$
+</div>
+<p>這就是為什麼單晶體 Forward 的 D 絕對不能超過 50%。</p>
+
+<h3>4.2.4 進階拓撲：雙晶體順向 (Two-Switch Forward)</h3>
+<p>為了去除麻煩的第三繞組並降低開關應力，高功率應用常用雙晶體架構。</p>
+<ul>
+    <li>使用兩個 MOSFET 同時導通/截止。</li>
+    <li>截止時，利用兩顆二極體將變壓器反向箝位到 \\( V_{in} \\)，自動完成磁通重置。</li>
+    <li><strong>優點：</strong> 開關應力僅為 \\( V_{in} \\) (單晶體為 \\( 2V_{in} \\))，且無需重置繞組。</li>
+</ul>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 基礎增益</h4>
+    <p><strong>Q1：</strong> 輸入 300V，輸出 12V。變壓器匝數比 \\( N_p:N_s = 10:1 \\)。求佔空比 \\( D \\)。(忽略二極體壓降)</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        公式：\\( V_o = V_{in} \\cdot \\frac{N_s}{N_p} \\cdot D \\)<br>
+        \\( 12 = 300 \\cdot \\frac{1}{10} \\cdot D = 30 D \\)<br>
+        \\( D = 12/30 = 0.4 \\)<br>
+        (小於 0.5，設計合理)
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 開關應力</h4>
+    <p><strong>Q2：</strong> 在單晶體 Forward ( \\( N_r = N_p \\) ) 中，當開關截止時，MOSFET \\( V_{ds} \\) 承受的電壓是多少？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        截止時，重置繞組將變壓器電壓箝位在 \\( V_{in} \\) (為了重置)。根據變壓器原理，一次側繞組也會感應出 \\( V_{in} \\)。<br>
+        因此 \\( V_{ds} = V_{in} (\\text{電源}) + V_{in} (\\text{感應}) = 2 V_{in} \\)。<br>
+        若輸入 300V，MOSFET 至少要選 600V 以上。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 電感選型</h4>
+    <p><strong>Q3：</strong> Forward 的輸出電感 \\( L_o \\) 設計邏輯與哪種轉換器相同？若負載變輕，\\( L_o \\) 電流不連續 (DCM) 會發生什麼事？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        完全等同於 <strong>Buck Converter</strong>。<br>
+        若進入 DCM (電感電流斷續)，輸出電壓會隨負載變輕而飄高 (不再是 \\( V_{in} \\cdot n \\cdot D \\))，需要閉迴路降低 D 來穩壓。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 磁化電流</h4>
+    <p><strong>Q4：</strong> 為什麼 Forward 變壓器不建議加氣隙 (Air Gap)？Flyback 卻一定要加？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        Forward 變壓器是用來「傳遞」功率的，理想上磁化電流 \\( I_m \\) 越小越好 (因為 \\( I_m \\) 不做功，只產生損耗且需要重置)。加氣隙會降低電感量 \\( L_m \\)，導致 \\( I_m \\) 暴增，增加無謂的損耗與重置困難。<br>
+        Flyback 則是用來「儲存」能量的，必須加氣隙才能存得下能量。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 雙晶體優勢</h4>
+    <p><strong>Q5：</strong> 為什麼 500W 以上的 ATX 電源供應器，大多使用雙晶體順向 (Two-Switch Forward) 而非單晶體？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. <strong>低應力：</strong> 開關只需承受 \\( V_{in} \\)，可選用低耐壓、低 \\( R_{DS(on)} \\) 的 MOSFET，提升效率。<br>
+        2. <strong>無漏感突波：</strong> 漏感能量會直接回饋到電源，不需要 RCD Snubber 消耗掉，效率更高。<br>
+        3. <strong>變壓器簡單：</strong> 不需要繞第三個重置繞組。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+            
+            {
+                id: "ch4-3",
+                category: "第四章：隔離型 DC-DC 轉換器",
+                title: "4.3 全橋與半橋轉換器：大功率拓撲與磁通平衡",
+                content: `
+                    <div class="content-body">
+<p>當功率需求超過 500W 甚至達到數 kW 時，單晶體架構的應力過大。橋式轉換器 (Bridge Converters) 利用 2 或 4 顆開關，能更有效地利用變壓器磁芯（運作於 I、III 象限），是高功率應用的標準解決方案。</p>
+
+<h3>4.3.1 半橋轉換器 (Half-Bridge)</h3>
+<p>半橋使用兩個電容分壓，將輸入電壓切半。</p>
+
+<div class="figure-box">
+    <img src="images/4.3_bridge_topologies.jpg" alt="半橋 (Half-Bridge) 與全橋 (Full-Bridge) 轉換器的電路拓撲比較">
+    <div class="figure-caption">圖 4.3.1：(a) 半橋：利用分壓電容 \\( C_1, C_2 \\)，變壓器僅承受 \\( V_{in}/2 \\)；(b) 全橋：利用四顆開關，變壓器承受完整 \\( V_{in} \\)。</div>
+</div>
+
+<ul>
+    <li><strong>結構：</strong> 上下兩顆開關 \\( Q_1, Q_2 \\) 輪流導通，搭配兩個分壓電容。</li>
+    <li><strong>變壓器電壓：</strong> \\( \\pm \\frac{V_{in}}{2} \\)。</li>
+    <li><strong>優點：</strong> 開關只需承受 \\( V_{in} \\)，且變壓器無直流偏壓問題（電容隔直）。</li>
+    <li><strong>缺點：</strong> 電流為全橋的 2 倍（為了傳送相同功率），適合中功率 (500W~1kW)。</li>
+</ul>
+
+<h3>4.3.2 全橋轉換器 (Full-Bridge)</h3>
+<p>全橋是電源界的重型武器，使用四顆開關 \\( Q_1 \\sim Q_4 \\)。</p>
+<ul>
+    <li><strong>結構：</strong> 對角線開關同時導通（\\( Q_1, Q_4 \\) 一組；\\( Q_2, Q_3 \\) 一組）。</li>
+    <li><strong>變壓器電壓：</strong> \\( \\pm V_{in} \\)。電壓利用率是半橋的 2 倍。</li>
+    <li><strong>應用：</strong> 1kW 以上的大功率電源、電動車充電樁。</li>
+</ul>
+
+<h3>4.3.3 致命傷：磁通不平衡 (Flux Walking)</h3>
+<p>理論上，正半週與負半週的伏秒積應該相等，磁通會在 B-H 迴圈中心對稱擺動。但在全橋電路中，若開關導通時間有些微不對稱 (\\( \\Delta t \\)) 或元件壓降不一致，會導致微小的直流電壓加在變壓器上。</p>
+
+<div class="figure-box">
+    <img src="images/4.3_flux_walking.jpg" alt="磁通不平衡導致 B-H 操作點逐週期偏移至飽和區的示意圖">
+    <div class="figure-caption">圖 4.3.2：階梯式飽和 (Staircase Saturation)。直流偏壓導致磁通每一週期都往上走一點，最終撞到 \\( B_{sat} \\) 導致炸機。</div>
+</div>
+
+<h4>解決方案：隔直電容 (Blocking Capacitor)</h4>
+<p>在變壓器一次側串聯一個無極性電容 \\( C_b \\)。</p>
+<div class="formula-box">
+    $$ V_{C_b} = I_{dc} \\cdot t / C $$
+</div>
+<p>當有直流電流試圖流過時，電容會充電產生反向電壓抵消之，從而自動平衡磁通。半橋天生具有此電容，全橋則必須額外串聯。</p>
+
+<h3>4.3.4 進階技術：移相全橋 (Phase-Shifted Full-Bridge, PSFB)</h3>
+<p>傳統 PWM 全橋是「硬切換」，損耗大。PSFB 透過控制橋臂之間的「相位差」來調節輸出，並利用變壓器漏感 \\( L_{lk} \\) 與開關寄生電容 \\( C_{oss} \\) 諧振，實現 <strong>零電壓切換 (ZVS)</strong>。</p>
+<div class="note-box">
+    <strong>ZVS 效益：</strong> 讓開關在導通前，兩端電壓已降為零。這消除了 \\( \\frac{1}{2} C_{oss} V^2 \\) 的開通損耗，允許頻率大幅提升。
+</div>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 匝數比計算</h4>
+    <p><strong>Q1：</strong> 設計一個 1kW 電源，輸入 400V，輸出 48V。若分別使用半橋與全橋 (D=0.8)，求所需的變壓器匝數比 \\( N_p/N_s \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        公式：\\( V_o = V_{prim} \\cdot \\frac{N_s}{N_p} \\cdot D \\)<br>
+        <strong>全橋：</strong> \\( V_{prim} = 400V \\)。\\( 48 = 400 \\cdot n \\cdot 0.8 \\Rightarrow n = 0.15 \\Rightarrow N_p:N_s \\approx 6.6:1 \\)<br>
+        <strong>半橋：</strong> \\( V_{prim} = 200V \\)。\\( 48 = 200 \\cdot n \\cdot 0.8 \\Rightarrow n = 0.3 \\Rightarrow N_p:N_s \\approx 3.3:1 \\)<br>
+        半橋一次側匝數只需全橋的一半。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 應力分析</h4>
+    <p><strong>Q2：</strong> 承上題，求半橋與全橋的一次側開關截止電壓 \\( V_{ds} \\) 與大約的峰值電流 \\( I_{pk} \\) (忽略漣波)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>電壓應力：</strong> 兩者開關皆跨接在 \\( V_{in} \\) 兩端，故均為 400V。<br>
+        <strong>電流應力：</strong> \\( P = V_{prim} \\cdot I \\)。<br>
+        全橋：\\( 1000W = 400V \\cdot I \\Rightarrow I = 2.5A \\)。<br>
+        半橋：\\( 1000W = 200V \\cdot I \\Rightarrow I = 5.0A \\)。<br>
+        結論：半橋開關電流負擔大一倍。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 磁通平衡</h4>
+    <p><strong>Q3：</strong> 為什麼使用電流模式控制 (Current Mode Control) 可以自動解決全橋的 Flux Walking 問題？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        電流模式控制是逐週期檢測峰值電流 (Peak Current Limit)。若磁通開始偏向某一邊，該方向的激磁電流會增加，導致總電流上升更快，控制器會提早關斷開關 (縮短 D)，反之亦然。這種負回授機制能自動平衡伏秒積。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 軟切換</h4>
+    <p><strong>Q4：</strong> 移相全橋 (PSFB) 為了達成 ZVS，通常需要較大還是較小的漏感 \\( L_{lk} \\)？這對佔空比有什麼副作用？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        需要<strong>較大的漏感</strong> (或外加諧振電感)。因為 ZVS 能量來自 \\( \\frac{1}{2} L_{lk} I^2 \\)，能量必須足夠抽乾 \\( C_{oss} \\) 的電荷。<br>
+        <strong>副作用：</strong> 漏感會導致「佔空比丟失 (Duty Cycle Loss)」，因為電流換相需要時間，這段時間無法傳遞能量，導致有效 D 減小。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 拓撲選擇</h4>
+    <p><strong>Q5：</strong> 你正在設計一個 3kW 的伺服器電源 (400V 輸入)。你會選擇 Forward、半橋還是全橋？為什麼？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>全橋 (Full-Bridge) 或 PSFB。</strong><br>
+        1. Forward 單晶體應力太高 (800V)，且變壓器利用率低 (僅一象限)。<br>
+        2. 半橋電流太大 (3kW/200V = 15A)，開關與電容損耗高。<br>
+        3. 全橋變壓器利用率最高，且可透過移相控制實現高效率 ZVS。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
         ];
 
         // === 程式邏輯區 ===
@@ -1909,3 +2172,4 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
 </body>
 
 </html>
+
