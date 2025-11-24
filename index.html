@@ -2114,6 +2114,370 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
                     </div>
                 `
             },
+            
+            {
+                id: "ch5-1",
+                category: "第五章：閉迴路控制設計",
+                title: "5.1 小訊號建模 (Small Signal Modeling)：從開關到數學公式",
+                content: `
+                    <div class="content-body">
+<p>轉換器若沒有閉迴路控制，當輸入電壓 \\( V_{in} \\) 波動或負載 \\( R \\) 改變時，輸出電壓 \\( V_o \\) 將無法維持穩定。為了設計控制器，我們必須先求出功率級 (Power Stage) 的數學模型，也就是<strong>轉移函數 (Transfer Function)</strong>。</p>
+
+<h3>5.1.1 建模的挑戰：非線性與時變</h3>
+<p>切換式電源是一個「非線性、時變 (Time-variant)」系統。開關在 ON/OFF 之間切換，電路結構不斷改變，因此我們無法直接使用拉普拉斯轉換 (Laplace Transform) 或波德圖 (Bode Plot)。</p>
+<p>解決方案是三部曲：</p>
+<ol>
+    <li><strong>平均化 (Averaging)：</strong> 抹除高頻開關漣波，只看一個週期內的平均行為。</li>
+    <li><strong>擾動 (Perturbation)：</strong> 將變數拆解為「直流穩態點」與「交流小訊號」。 \\( x(t) = X + \\hat{x}(t) \\)</li>
+    <li><strong>線性化 (Linearization)：</strong> 忽略極小的二次項 ( \\( \\hat{x} \\cdot \\hat{y} \\approx 0 \\))，得到線性模型。</li>
+</ol>
+
+<h3>5.1.2 典型的開關等效模型 (The Canonical Model)</h3>
+<p>經過上述數學推導，我們可以畫出一個通用的「小訊號等效電路模型」。</p>
+
+<div class="figure-box">
+    <img src="images/5.1_canonical_model.jpg" alt="包含理想變壓器與受控源的切換式電源小訊號等效電路模型">
+    <div class="figure-caption">圖 5.1.1：典型小訊號模型。包含一個變比為 \\( M(D) \\) 的理想變壓器，以及描述佔空比擾動 \\( \\hat{d} \\) 對電壓電流影響的受控源 \\( e(s)\\hat{d} \\) 與 \\( j(s)\\hat{d} \\)。</div>
+</div>
+
+<p>這個模型告訴我們：<strong>佔空比微小的變化 \\( \\hat{d} \\)，會如何影響輸出電壓 \\( \\hat{v}_o \\)</strong>。這就是我們需要的「控制-輸出轉移函數」 \\( G_{vd}(s) \\)。</p>
+
+<h3>5.1.3 Buck Converter 的轉移函數解析</h3>
+<p>以 Buck 為例，其控制轉移函數是一個標準的二階系統：</p>
+<div class="formula-box">
+    $$ G_{vd}(s) = \\frac{\\hat{v}_o(s)}{\\hat{d}(s)} = V_{in} \\frac{1}{1 + \\frac{s}{Q\\omega_0} + (\\frac{s}{\\omega_0})^2} $$
+</div>
+
+<h4>物理意義解析</h4>
+<ul>
+    <li><strong>直流增益 (DC Gain)：</strong> 當 \\( s \\to 0 \\) 時，\\( G_{vd} = V_{in} \\)。這很直觀，因為穩態公式是 \\( V_o = D V_{in} \\)，微分後 \\( \\Delta V_o / \\Delta D = V_{in} \\)。</li>
+    <li><strong>雙極點 (Double Pole)：</strong> 位於角頻率 \\( \\omega_0 = \\frac{1}{\\sqrt{LC}} \\)。這是由 L 和 C 產生的諧振點。在此頻率後，增益以 -40dB/dec 快速下降，相位急劇落後 180 度。這就是為什麼 Buck 很難穩定的原因！</li>
+    <li><strong>品質因子 (Q)：</strong> 決定諧振峰值的高度，受負載電阻與寄生電阻影響。</li>
+</ul>
+
+<div class="figure-box">
+    <img src="images/5.1_buck_bode.jpg" alt="Buck Converter 轉移函數 Gvd(s) 的波德圖 (增益與相位)">
+    <div class="figure-caption">圖 5.1.2：Buck 的開迴路波德圖。注意在諧振頻率 \\( f_0 \\) 處，相位快速下降 180 度，這對補償器設計是巨大的挑戰。</div>
+</div>
+
+<h3>5.1.4 右半平面零點 (RHPZ) 的數學再現</h3>
+<p>對於 Boost 或 Buck-Boost，其轉移函數分子會出現 \\( (1 - \\frac{s}{\\omega_z}) \\) 的項。注意那個負號！</p>
+<p>這代表當 \\( \\hat{d} \\) 增加時，低頻下輸出增加，但高頻下輸出反而減少（相位落後）。這就是數學上的<strong>右半平面零點</strong>，它強迫我們必須把頻寬 \\( f_c \\) 壓得很低。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 擾動觀念</h4>
+    <p><strong>Q1：</strong> 在小訊號分析中，我們假設 \\( \\hat{d} \\ll D \\)。如果佔空比發生大幅度的跳動（例如從 0.1 跳到 0.9），這個模型還準確嗎？為什麼？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>不準確。</strong><br>
+        小訊號模型是基於「線性化」假設（泰勒展開式只取第一項）。大訊號變動會觸發系統的非線性行為（如電感飽和、運算放大器飽和），此時需要使用大訊號模型 (Large Signal Model) 或時域模擬來分析。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 轉折頻率計算</h4>
+    <p><strong>Q2：</strong> 一個 Buck Converter，\\( L=22\\mu H, C=47\\mu F \\)。求其 LC 雙極點的諧振頻率 \\( f_0 \\)。</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        公式：\\( f_0 = \\frac{1}{2\\pi \\sqrt{LC}} \\)<br>
+        \\( \\sqrt{LC} = \\sqrt{22e-6 \\cdot 47e-6} \\approx \\sqrt{1034} \\cdot 10^{-6} \\approx 32.15 \\mu s \\)<br>
+        \\( f_0 = \\frac{1}{2\\pi \\cdot 32.15e-6} \\approx 4.95 kHz \\)<br>
+        這代表在這個頻率之後，增益會快速衰減。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 相位落後</h4>
+    <p><strong>Q3：</strong> 承上題，在 \\( 50kHz \\) (遠大於 \\( f_0 \\)) 處，Buck 的功率級 (Power Stage) 本身會貢獻多少相位落後？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        由於 \\( f \\gg f_0 \\)，雙極點會貢獻完整的 <strong>-180度</strong> 相位落後。這意味著如果沒有補償器介入，回授訊號會變成「正回授」（負負得正），導致系統振盪。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 ESR 零點</h4>
+    <p><strong>Q4：</strong> 輸出電容的 ESR 會在轉移函數中引入一個左半平面零點 \\( \\omega_{ESR} = 1 / (R_{ESR} C) \\)。這對系統穩定度是好事還是壞事？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>通常是好事 (但在高頻可能是干擾)。</strong><br>
+        零點會提供 +90 度的相位領先 (Phase Boost)，這有助於抵消 LC 雙極點造成的 -180 度落後，增加相位裕度 (Phase Margin)。有些老式電源甚至依賴 ESR 來穩定系統。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 模式差異</h4>
+    <p><strong>Q5：</strong> (思考題) 如果 Buck Converter 進入 DCM 模式，其轉移函數的極點會發生什麼變化？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        非常劇烈的變化！<br>
+        在 CCM 下是雙極點 (Double Pole)。但在 DCM 下，由於電感電流斷續，電感不再作為狀態變數參與低頻動態，系統退化為 <strong>單極點 (Single Pole)</strong> 系統。這使得 DCM 其實比 CCM 更容易補償與穩定。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
+            
+            {
+                id: "ch5-2",
+                category: "第五章：閉迴路控制設計",
+                title: "5.2 補償器設計攻略：Type II/III 與 K-Factor 法",
+                content: `
+                    <div class="content-body">
+<p>在 5.1 節中，我們得知功率級 (Power Stage) 的轉移函數 \\( G_{vd}(s) \\) 存在雙極點導致的相位驟降。若不進行補償，閉迴路系統必將震盪發散。本節將深入探討如何設計誤差放大器 (Error Amplifier) 的補償網路，以「整形」迴路增益，確保系統兼具快速響應與絕對穩定。</p>
+
+<h3>5.2.1 穩定度的絕對判據 (Stability Criteria)</h3>
+<p>在設計補償器之前，我們必須量化「穩定」的定義。我們關注開迴路增益 \\( T(s) = G_{vd}(s) \\cdot H(s) \\cdot G_{c}(s) \\) 的波德圖特性。</p>
+
+<div class="figure-box">
+    <img src="images/5.2_stability_criteria.jpg" alt="波德圖上的增益裕度 (GM) 與相位裕度 (PM) 定義示意圖">
+    <div class="figure-caption">圖 5.2.1：穩定度定義。穿越頻率 \\( f_c \\) 處的相位距離 -180 度還有多少空間，即為相位裕度。</div>
+</div>
+
+<h4>1. 穿越頻率 (Crossover Frequency, \\( f_c \\))</h4>
+<p>這是 \\( |T(s)| = 1 \\) (0dB) 的頻率。它決定了系統的<strong>頻寬 (Bandwidth)</strong>。
+<br><strong>設計準則：</strong> 通常設定為開關頻率的 1/10 到 1/5 (\\( f_{sw}/10 \\le f_c \\le f_{sw}/5 \\))。太低反應慢，太高容易受切換雜訊干擾。</p>
+
+<h4>2. 相位裕度 (Phase Margin, PM)</h4>
+<p>在 \\( f_c \\) 處，相位 \\( \\angle T(j\\omega) \\) 與 -180° 的距離。
+<br><strong>數學定義：</strong> \\( PM = 180^\\circ + \\angle T(j 2\\pi f_c) \\)
+<br><strong>工程建議：</strong>
+<ul>
+    <li>\\( PM < 45^\\circ \\)：輸出會有明顯的過衝 (Overshoot) 與振鈴 (Ringing)。</li>
+    <li>\\( PM = 45^\\circ \\sim 60^\\circ \\)：最佳平衡點，響應快且穩定。</li>
+    <li>\\( PM > 75^\\circ \\)：系統反應過於遲鈍 (Over-damped)。</li>
+</ul></p>
+
+<h4>3. 增益裕度 (Gain Margin, GM)</h4>
+<p>當相位到達 -180° 時，增益低於 0dB 的幅度。
+<br><strong>工程建議：</strong> 至少需要 \\( 10dB \\) 以上的衰減，以容忍元件老化帶來的參數漂移。</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>5.2.2 補償器拓撲詳解 (Compensator Topologies)</h3>
+<p>根據功率級的特性（是電壓模式還是電流模式？是 CCM 還是 DCM？），我們選擇不同的補償網路。</p>
+
+<h4>Type I：純積分器 (Integrator)</h4>
+<p>僅有一個極點在原點（0 Hz）。
+<br><strong>適用：</strong> 系統本身相位落後極小（如 CCM 下的電流模式控制），或對頻寬要求極低的場合。
+<br><strong>缺點：</strong> 無法提供任何相位提升 (Phase Boost)，無法補償 LC 雙極點。</p>
+
+<h4>Type II：單零點-雙極點 (PI + High Freq Pole)</h4>
+<p>這是在電流模式控制 (Current Mode Control) 中最常用的補償器。</p>
+
+<div class="figure-box">
+    <img src="images/5.2_type2_circuit.jpg" alt="Type II 補償器電路圖 (Op-Amp 加上 R1, R2, C1, C2)">
+    <div class="figure-caption">圖 5.2.2：Type II 補償器電路。提供最大 90 度的相位提升。</div>
+</div>
+
+<p><strong>轉移函數推導：</strong>
+利用運算放大器的虛接地特性，阻抗 \\( Z_1 = R_1 \\)，回授阻抗 \\( Z_f \\) 為 \\( R_2 \\) 串聯 \\( C_1 \\) 後再並聯 \\( C_2 \\)。
+$$ G_c(s) = - \\frac{Z_f}{Z_1} = - \\frac{1 + s R_2 C_1}{s R_1 (C_1 + C_2)(1 + s R_2 \\frac{C_1 C_2}{C_1+C_2})} $$
+這包含了一個原點極點，一個零點 (\\( f_{z} \\))，和一個高頻極點 (\\( f_{p} \\))。</p>
+
+<h4>Type III：雙零點-三極點 (PID + Noise Filter)</h4>
+<p>這是<strong>電壓模式 Buck Converter (CCM)</strong> 的救星。因為 LC 雙極點會造成 180 度相位落後，Type II 的 90 度提升不夠用，必須使用 Type III 提供最大 180 度的相位提升。</p>
+
+<div class="figure-box">
+    <img src="images/5.2_type3_circuit.jpg" alt="Type III 補償器電路圖 (Op-Amp 加上 R1-R3, C1-C3)">
+    <div class="figure-caption">圖 5.2.3：Type III 補償器。比 Type II 多了一組 RC 並聯在輸入端，創造第二個零點。</div>
+</div>
+
+<p><strong>極零點配置策略：</strong>
+<ul>
+    <li><strong>雙零點 (\\( f_{z1}, f_{z2} \\))：</strong> 放置在 LC 諧振頻率 \\( f_0 \\) 附近，用來抵消 LC 雙極點的相位下降。</li>
+    <li><strong>雙高頻極點 (\\( f_{p1}, f_{p2} \\))：</strong> 一個放在 \\( f_{ESR} \\) (抵消 ESR 零點)，另一個放在 \\( f_{sw}/2 \\) (濾除開關雜訊)。</li>
+</ul></p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>5.2.3 實戰設計：K-Factor 法 (K-Factor Method)</h3>
+<p>手動調整 R 和 C 來湊相位裕度是非常痛苦的。Dean Venable 提出的 K-Factor 法是業界標準的自動化流程。其核心思想是：<strong>強制補償器的相位峰值剛好發生在我們選定的穿越頻率 \\( f_c \\) 上。</strong></p>
+
+<h4>設計步驟 S.O.P.</h4>
+<ol>
+    <li><strong>量測功率級：</strong> 確定 \\( G_{vd}(s) \\) 在目標頻率 \\( f_c \\) 處的增益 \\( G_{plant} \\) 與相位 \\( \\phi_{plant} \\)。</li>
+    <li><strong>計算所需相位提升 (Boost)：</strong>
+        $$ \\text{Boost} = PM - \\phi_{plant} + 90^\\circ $$
+        (如果是 Type III，因為有原點極點 -90度，所以公式如上。目標 PM 通常設 60度)。</li>
+    <li><strong>計算 K 值：</strong>
+        $$ K = \\tan \\left( 45^\\circ + \\frac{\\text{Boost}}{4} \\right) $$ (針對 Type III)</li>
+    <li><strong>配置極零點：</strong>
+        $$ f_z = \\frac{f_c}{K}, \\quad f_p = f_c \\cdot K $$
+        這會讓相位峰值精確對準 \\( f_c \\)。</li>
+</ol>
+
+<hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+<h3>5.2.4 完整設計範例 (Design Example)</h3>
+<p><strong>題目：</strong> 設計一個 12V 轉 3.3V 的 Buck Converter 補償器。
+<br><strong>規格：</strong> \\( L=10\\mu H, C=100\\mu F (ESR=50m\\Omega) \\)，PWM 鋸齒波振幅 \\( V_m=1V \\)，\\( f_{sw}=100kHz \\)。
+<br><strong>目標：</strong> \\( f_c = 10kHz \\)，\\( PM = 60^\\circ \\)。</p>
+
+<h4>Step 1: 分析功率級特性</h4>
+<p>LC 諧振頻率 \\( f_0 = \\frac{1}{2\\pi\\sqrt{LC}} \\approx 5kHz \\)。
+<br>ESR 零點 \\( f_{ESR} = \\frac{1}{2\\pi R_{ESR} C} \\approx 31.8kHz \\)。
+<br>在 \\( f_c = 10kHz \\) 處 (大於 \\( f_0 \\))，功率級增益衰減約為 -40dB/dec，相位落後約 -160度 (接近 -180 但被 ESR 稍微拉回)。
+<br>設 \\( \\phi_{plant} \\approx -160^\\circ \\)，\\( G_{plant} \\) 經計算約為 -5dB。</p>
+
+<h4>Step 2: 計算所需 Boost</h4>
+<p>$$ \\text{Boost} = 60^\\circ - (-160^\\circ) - 90^\\circ = 130^\\circ $$
+需要 130 度的提升，Type II (max 90度) 做不到，<strong>必須選用 Type III</strong>。</p>
+
+<h4>Step 3: 計算 K 值與極零點</h4>
+<p>$$ K = \\tan(45 + 130/4) = \\tan(77.5^\\circ) \\approx 4.5 $$
+$$ f_z = 10k / 4.5 = 2.22 kHz $$
+$$ f_p = 10k \\times 4.5 = 45 kHz $$</p>
+
+<h4>Step 4: 計算電阻電容值 (Type III 公式)</h4>
+<p>選定 \\( R_1 = 10k\\Omega \\)。
+<br>1. 計算 \\( C_1 \\) 設定中頻增益 (補償功率級的 -5dB，即補償器要提供 +5dB = 1.77倍)：
+$$ C_1 = \\frac{1}{2\\pi f_c R_1 \\cdot (G_{plant}^{-1})} $$ (此處僅為近似，精確計算需完整代入 K-factor 公式)
+<br>...(詳細 R2, R3, C2, C3 計算省略，實務上通常使用 Excel 或 Mathcad 自動計算)...</p>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>💻 數位模擬實驗室 (Python Code)</h3>
+<p>不想手算？這裡提供一段 Python 程式碼，直接幫你畫出 Type III 補償器的 Bode 圖！</p>
+
+<pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; overflow-x: auto;">
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+
+# 定義參數
+R1 = 10e3
+R2 = 25e3
+R3 = 1e3
+C1 = 2.2e-9
+C2 = 100e-12
+C3 = 4.7e-9
+
+# Type III 轉移函數係數
+# Gc(s) = (1 + sR2C1)(1 + s(R1+R3)C3) / [ sR1(C1+C2)(1+sR2(C1//C2))(1+sR3C3) ]
+# 這裡使用簡化模型演示
+
+w, mag, phase = signal.bode(system, w=np.logspace(2, 6, 100))
+
+plt.semilogx(w/(2*np.pi), mag)
+plt.title('Type III Compensator Bode Plot')
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Gain (dB)')
+plt.grid(which='both')
+plt.show()
+</pre>
+
+<hr style="margin: 40px 0; border: 0; border-top: 2px dashed #ddd;">
+
+<h3>📝 課後練習題 (Practice Problems)</h3>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.1 穩定度判讀</h4>
+    <p><strong>Q1：</strong> 觀察某電源的閉迴路波德圖，發現相位裕度 PM 為 10 度。請問這台電源在負載瞬變 (Load Step) 時會出現什麼波形？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        10 度的 PM 代表系統處於「欠阻尼 (Under-damped)」狀態，極度接近不穩定。當負載跳動時，輸出電壓會出現嚴重的<strong>振鈴 (Ringing)</strong>，震盪很多個週期才能停下來，甚至可能持續震盪 (Singing)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.2 Type II 極限</h4>
+    <p><strong>Q2：</strong> 為什麼電壓模式控制 (Voltage Mode) 的 CCM Buck 很少使用 Type II 補償器？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        CCM Buck 具有 LC 雙極點，會造成 -180 度相位落後。Type II 只有一個零點，最多只能提供 +90 度的相位提升 (Phase Boost)。-180 + 90 = -90，加上原點極點的 -90，總相位會逼近 -180 度，導致相位裕度不足，系統不穩。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.3 頻寬選擇</h4>
+    <p><strong>Q3：</strong> 既然高頻寬代表響應快，為什麼我們不把 \\( f_c \\) 設定為 \\( f_{sw}/2 \\) (奈奎斯特頻率)？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        1. <strong>雜訊干擾：</strong> 頻寬過高會將開關切換雜訊 (Switching Noise) 放大並回授，導致 PWM 抖動 (Jitter)。<br>
+        2. <strong>採樣限制：</strong> 小訊號模型是基於「平均化」假設，當頻率接近 \\( f_{sw}/2 \\) 時，平均法失效，模型不再準確，且會有嚴重的混疊 (Aliasing) 效應。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.4 運放頻寬</h4>
+    <p><strong>Q4：</strong> 在設計高頻補償器 (例如 \\( f_c = 100kHz \\)) 時，若選用一顆 GBW (增益頻寬積) 為 1MHz 的運算放大器，是否合適？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        <strong>不合適。</strong><br>
+        在 Type III 中，誤差放大器通常需要提供中頻增益 (例如 20dB = 10倍)。需求頻寬 = \\( 100kHz \\times 10 = 1MHz \\)。這已經頂到了運放的極限，會導致額外的相位落後 (Op-Amp Pole)，讓系統不穩。通常建議運放 GBW 至少要是需求頻寬的 10 倍以上。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.5 K-Factor 數學</h4>
+    <p><strong>Q5：</strong> 在 K-Factor 法中，為什麼 \\( K \\) 值越大，相位提升 (Boost) 越多？但 K 值過大有什麼副作用？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        \\( K \\) 代表極點與零點分開的程度 (\\( f_p / f_z = K^2 \\))。極零點拉得越開，中間的相位提升平台就越寬、越高。<br>
+        <strong>副作用：</strong> K 值過大意味著 \\( f_p \\) 很高、\\( f_z \\) 很低。這會導致低頻增益下降 (穩態誤差變大)，且高頻增益不易衰減 (雜訊抑制變差)。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.6 軟啟動 (Soft Start)</h4>
+    <p><strong>Q6：</strong> 補償器設計得再好，為什麼上電瞬間還是需要 Soft Start？若沒有會怎樣？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        上電瞬間，輸出電壓為 0，誤差極大，補償器會輸出最大值 (Saturation)，命令 PWM 開到 100% Duty。這會導致巨大的<strong>湧浪電流 (Inrush Current)</strong>，可能燒毀 MOSFET 或觸發短路保護。Soft Start 強制參考電壓緩慢上升，讓 PWM 慢慢打開。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.7 跨導放大器 (OTA)</h4>
+    <p><strong>Q7：</strong> 許多現代 PWM IC 使用 OTA (Transconductance Amplifier) 而非傳統電壓型 Op-Amp。這對 Type II 補償器的接法有什麼改變？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        OTA 輸出的是電流而非電壓，且具有高輸出阻抗。因此補償網路通常是<strong>對地連接 (Ground referenced)</strong>，而不是跨接在負回授路徑上。這簡化了 IC 腳位設計，但轉移函數推導略有不同 (\\( G_c = g_m \\cdot Z_{out} \\))。
+        </p>
+    </details>
+</div>
+
+<div class="example-box" style="background-color: #fff; border-color: #cbd5e1;">
+    <h4 style="margin-top:0;">Lv.8 除錯挑戰</h4>
+    <p><strong>Q8：</strong> 量測 Bode 圖時，發現低頻增益很高，但在 1kHz 處相位卻突然掉了 180 度，且增益沒有下降，這不符合 LC 雙極點特性。請問最可能的問題是什麼？</p>
+    <details>
+        <summary style="cursor:pointer; color:#2563eb;">點擊查看解答</summary>
+        <p style="color:#475569; margin-top:10px;">
+        這通常不是電路特性，而是<strong>量測設定錯誤</strong>。最常見的是回授極性接反了 (正回授)，或者網路分析儀 (Network Analyzer) 的注入變壓器 (Injection Transformer) 方向接反，導致量測到的相位整體位移了 180 度。
+        </p>
+    </details>
+</div>
+                    </div>
+                `
+            },
         ];
 
         // === 程式邏輯區 ===
@@ -2172,4 +2536,5 @@ IGBT 損耗則包含平均電流項與 RMS 項：\\( P_{IGBT} = V_{T0} I_{avg} +
 </body>
 
 </html>
+
 
